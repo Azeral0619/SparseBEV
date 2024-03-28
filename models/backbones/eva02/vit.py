@@ -32,9 +32,16 @@ logger = logging.getLogger(__name__)
 
 
 class SwiGLU(nn.Module):
-    def __init__(self, in_features, hidden_features=None, out_features=None, act_layer=nn.SiLU, drop=0., 
-                norm_layer=nn.LayerNorm, subln=False
-            ):
+    def __init__(
+        self,
+        in_features,
+        hidden_features=None,
+        out_features=None,
+        act_layer=nn.SiLU,
+        drop=0.0,
+        norm_layer=nn.LayerNorm,
+        subln=False,
+    ):
         super().__init__()
         out_features = out_features or in_features
         hidden_features = hidden_features or in_features
@@ -45,7 +52,7 @@ class SwiGLU(nn.Module):
         self.act = act_layer()
         self.ffn_ln = norm_layer(hidden_features) if subln else nn.Identity()
         self.w3 = nn.Linear(hidden_features, out_features)
-        
+
         self.drop = nn.Dropout(drop)
 
     def forward(self, x):
@@ -60,22 +67,22 @@ class SwiGLU(nn.Module):
 
 class Attention(nn.Module):
     def __init__(
-            self, 
-            dim, 
-            num_heads=8, 
-            qkv_bias=True, 
-            qk_scale=None, 
-            attn_head_dim=None, 
-            rope=None,
-            xattn=True,
-        ):
+        self,
+        dim,
+        num_heads=8,
+        qkv_bias=True,
+        qk_scale=None,
+        attn_head_dim=None,
+        rope=None,
+        xattn=True,
+    ):
         super().__init__()
         self.num_heads = num_heads
         head_dim = dim // num_heads
         if attn_head_dim is not None:
             head_dim = attn_head_dim
         all_head_dim = head_dim * self.num_heads
-        self.scale = qk_scale or head_dim ** -0.5
+        self.scale = qk_scale or head_dim**-0.5
 
         self.q_proj = nn.Linear(dim, all_head_dim, bias=False)
         self.k_proj = nn.Linear(dim, all_head_dim, bias=False)
@@ -192,10 +199,10 @@ class Block(nn.Module):
         self,
         dim,
         num_heads,
-        mlp_ratio=4*2/3,
+        mlp_ratio=4 * 2 / 3,
         qkv_bias=True,
         drop_path=0.0,
-        norm_layer=partial(nn.LayerNorm, eps=1e-6), 
+        norm_layer=partial(nn.LayerNorm, eps=1e-6),
         window_size=0,
         use_residual_block=False,
         rope=None,
@@ -234,8 +241,8 @@ class Block(nn.Module):
         self.drop_path = DropPath(drop_path) if drop_path > 0.0 else nn.Identity()
         self.norm2 = norm_layer(dim)
         self.mlp = SwiGLU(
-            in_features=dim, 
-            hidden_features=int(dim * mlp_ratio), 
+            in_features=dim,
+            hidden_features=int(dim * mlp_ratio),
             subln=True,
             norm_layer=norm_layer,
         )
@@ -251,7 +258,7 @@ class Block(nn.Module):
                 bottleneck_channels=dim // 2,
                 norm="LN",
             )
-        
+
         self.use_act_checkpoint = use_act_checkpoint
 
     def inner_forward(self, x):
@@ -300,7 +307,7 @@ class ViT(Backbone):
         embed_dim=768,
         depth=12,
         num_heads=12,
-        mlp_ratio=4*2/3,
+        mlp_ratio=4 * 2 / 3,
         qkv_bias=True,
         drop_path_rate=0.0,
         norm_layer=partial(nn.LayerNorm, eps=1e-6),
@@ -354,7 +361,9 @@ class ViT(Backbone):
 
         if use_abs_pos:
             # Initialize absolute positional embedding with pretrain image size.
-            num_patches = (pretrain_img_size // patch_size) * (pretrain_img_size // patch_size)
+            num_patches = (pretrain_img_size // patch_size) * (
+                pretrain_img_size // patch_size
+            )
             num_positions = (num_patches + 1) if pretrain_use_cls_token else num_patches
             self.pos_embed = nn.Parameter(torch.zeros(1, num_positions, embed_dim))
         else:
@@ -373,7 +382,7 @@ class ViT(Backbone):
             dim=half_head_dim,
             pt_seq_len=pt_hw_seq_len,
             ft_seq_len=hw_seq_len if intp_freq else None,
-            real_img_size=real_img_size
+            real_img_size=real_img_size,
         )
 
         # stochastic depth decay rule
@@ -392,7 +401,7 @@ class ViT(Backbone):
                 use_residual_block=i in residual_block_indexes,
                 rope=self.rope_win if i in window_block_indexes else self.rope_glb,
                 xattn=xattn,
-                use_act_checkpoint=use_act_checkpoint
+                use_act_checkpoint=use_act_checkpoint,
             )
             self.blocks.append(block)
 
@@ -435,7 +444,7 @@ class ViT(Backbone):
 
         if self.frozen_blocks >= 0:
             freeze_module(self.patch_embed)
-            self.pos_embed.requires_grad=False
+            self.pos_embed.requires_grad = False
 
         for i in range(0, self.frozen_blocks):
             freeze_module(self.blocks[i])
@@ -486,7 +495,9 @@ class SimpleFeaturePyramid(Backbone):
         self.scale_factors = scale_factors
 
         input_shapes = net.output_shape()
-        strides = [int(input_shapes[in_feature].stride / scale) for scale in scale_factors]
+        strides = [
+            int(input_shapes[in_feature].stride / scale) for scale in scale_factors
+        ]
         _assert_strides_are_log2_contiguous(strides)
 
         dim = input_shapes[in_feature].channels
@@ -541,7 +552,9 @@ class SimpleFeaturePyramid(Backbone):
         self.in_feature = in_feature
         self.top_block = top_block
         # Return feature names are "p<stage>", like ["p2", "p3", ..., "p6"]
-        self._out_feature_strides = {"p{}".format(int(math.log2(s))): s for s in strides}
+        self._out_feature_strides = {
+            "p{}".format(int(math.log2(s))): s for s in strides
+        }
         # top block output feature maps.
         if self.top_block is not None:
             for s in range(stage, stage + self.top_block.num_levels):
@@ -582,7 +595,9 @@ class SimpleFeaturePyramid(Backbone):
             if self.top_block.in_feature in bottom_up_features:
                 top_block_in_feature = bottom_up_features[self.top_block.in_feature]
             else:
-                top_block_in_feature = results[self._out_features.index(self.top_block.in_feature)]
+                top_block_in_feature = results[
+                    self._out_features.index(self.top_block.in_feature)
+                ]
             results.extend(self.top_block(top_block_in_feature))
         assert len(self._out_features) == len(results)
         return {f: res for f, res in zip(self._out_features, results)}

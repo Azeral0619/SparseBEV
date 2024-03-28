@@ -1,4 +1,4 @@
-import torch 
+import torch
 
 
 def normalize_bbox(bboxes):
@@ -65,6 +65,7 @@ def decode_bbox(bboxes, pc_range=None):
     wlh = bboxes[..., 3:6].exp()
     rot = torch.atan2(bboxes[..., 6:7], bboxes[..., 7:8])
 
+    # 恢复坐标到原始范围
     if pc_range is not None:
         xyz[..., 0] = xyz[..., 0] * (pc_range[3] - pc_range[0]) + pc_range[0]
         xyz[..., 1] = xyz[..., 1] * (pc_range[4] - pc_range[1]) + pc_range[1]

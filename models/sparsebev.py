@@ -12,28 +12,41 @@ from .utils import GridMask, pad_multiple, GpuPhotoMetricDistortion
 
 @DETECTORS.register_module()
 class SparseBEV(MVXTwoStageDetector):
-    def __init__(self,
-                 data_aug=None,
-                 stop_prev_grad=0,
-                 pts_voxel_layer=None,
-                 pts_voxel_encoder=None,
-                 pts_middle_encoder=None,
-                 pts_fusion_layer=None,
-                 img_backbone=None,
-                 pts_backbone=None,
-                 img_neck=None,
-                 pts_neck=None,
-                 pts_bbox_head=None,
-                 img_roi_head=None,
-                 img_rpn_head=None,
-                 train_cfg=None,
-                 test_cfg=None,
-                 pretrained=None):
-        super(SparseBEV, self).__init__(pts_voxel_layer, pts_voxel_encoder,
-                             pts_middle_encoder, pts_fusion_layer,
-                             img_backbone, pts_backbone, img_neck, pts_neck,
-                             pts_bbox_head, img_roi_head, img_rpn_head,
-                             train_cfg, test_cfg, pretrained)
+    def __init__(
+        self,
+        data_aug=None,
+        stop_prev_grad=0,
+        pts_voxel_layer=None,
+        pts_voxel_encoder=None,
+        pts_middle_encoder=None,
+        pts_fusion_layer=None,
+        img_backbone=None,
+        pts_backbone=None,
+        img_neck=None,
+        pts_neck=None,
+        pts_bbox_head=None,
+        img_roi_head=None,
+        img_rpn_head=None,
+        train_cfg=None,
+        test_cfg=None,
+        pretrained=None,
+    ):
+        super(SparseBEV, self).__init__(
+            pts_voxel_layer,
+            pts_voxel_encoder,
+            pts_middle_encoder,
+            pts_fusion_layer,
+            img_backbone,
+            pts_backbone,
+            img_neck,
+            pts_neck,
+            pts_bbox_head,
+            img_roi_head,
+            img_rpn_head,
+            train_cfg,
+            test_cfg,
+            pretrained,
+        )
         self.data_aug = data_aug
         self.stop_prev_grad = stop_prev_grad
         self.color_aug = GpuPhotoMetricDistortion()
@@ -43,7 +56,7 @@ class SparseBEV(MVXTwoStageDetector):
         self.memory = {}
         self.queue = queue.Queue()
 
-    @auto_fp16(apply_to=('img'), out_fp32=True)
+    @auto_fp16(apply_to=("img"), out_fp32=True)
     def extract_img_feat(self, img):
         if self.use_grid_mask:
             img = self.grid_mask(img)
@@ -70,16 +83,20 @@ class SparseBEV(MVXTwoStageDetector):
 
         # move some augmentations to GPU
         if self.data_aug is not None:
-            if 'img_color_aug' in self.data_aug and self.data_aug['img_color_aug'] and self.training:
+            if (
+                "img_color_aug" in self.data_aug
+                and self.data_aug["img_color_aug"]
+                and self.training
+            ):
                 img = self.color_aug(img)
 
-            if 'img_norm_cfg' in self.data_aug:
-                img_norm_cfg = self.data_aug['img_norm_cfg']
+            if "img_norm_cfg" in self.data_aug:
+                img_norm_cfg = self.data_aug["img_norm_cfg"]
 
-                norm_mean = torch.tensor(img_norm_cfg['mean'], device=img.device)
-                norm_std = torch.tensor(img_norm_cfg['std'], device=img.device)
+                norm_mean = torch.tensor(img_norm_cfg["mean"], device=img.device)
+                norm_std = torch.tensor(img_norm_cfg["std"], device=img.device)
 
-                if img_norm_cfg['to_rgb']:
+                if img_norm_cfg["to_rgb"]:
                     img = img[:, [2, 1, 0], :, :]  # BGR to RGB
 
                 img = img - norm_mean.reshape(1, 3, 1, 1)
@@ -87,12 +104,14 @@ class SparseBEV(MVXTwoStageDetector):
 
             for b in range(B):
                 img_shape = (img.shape[2], img.shape[3], img.shape[1])
-                img_metas[b]['img_shape'] = [img_shape for _ in range(N)]
-                img_metas[b]['ori_shape'] = [img_shape for _ in range(N)]
+                img_metas[b]["img_shape"] = [img_shape for _ in range(N)]
+                img_metas[b]["ori_shape"] = [img_shape for _ in range(N)]
 
-            if 'img_pad_cfg' in self.data_aug:
-                img_pad_cfg = self.data_aug['img_pad_cfg']
-                img = pad_multiple(img, img_metas, size_divisor=img_pad_cfg['size_divisor'])
+            if "img_pad_cfg" in self.data_aug:
+                img_pad_cfg = self.data_aug["img_pad_cfg"]
+                img = pad_multiple(
+                    img, img_metas, size_divisor=img_pad_cfg["size_divisor"]
+                )
 
         input_shape = img.shape[-2:]
         # update real input shape of each single img
@@ -103,21 +122,26 @@ class SparseBEV(MVXTwoStageDetector):
             H, W = input_shape
             img = img.reshape(B, -1, 6, C, H, W)
 
-            img_grad = img[:, :self.stop_prev_grad]
-            img_nograd = img[:, self.stop_prev_grad:]
+            img_grad = img[:, : self.stop_prev_grad]
+            img_nograd = img[:, self.stop_prev_grad :]
 
             all_img_feats = [self.extract_img_feat(img_grad.reshape(-1, C, H, W))]
 
             with torch.no_grad():
                 self.eval()
                 for k in range(img_nograd.shape[1]):
-                    all_img_feats.append(self.extract_img_feat(img_nograd[:, k].reshape(-1, C, H, W)))
+                    all_img_feats.append(
+                        self.extract_img_feat(img_nograd[:, k].reshape(-1, C, H, W))
+                    )
                 self.train()
 
             img_feats = []
             for lvl in range(len(all_img_feats[0])):
                 C, H, W = all_img_feats[0][lvl].shape[1:]
-                img_feat = torch.cat([feat[lvl].reshape(B, -1, 6, C, H, W) for feat in all_img_feats], dim=1)
+                img_feat = torch.cat(
+                    [feat[lvl].reshape(B, -1, 6, C, H, W) for feat in all_img_feats],
+                    dim=1,
+                )
                 img_feat = img_feat.reshape(-1, C, H, W)
                 img_feats.append(img_feat)
         else:
@@ -130,12 +154,9 @@ class SparseBEV(MVXTwoStageDetector):
 
         return img_feats_reshaped
 
-    def forward_pts_train(self,
-                          pts_feats,
-                          gt_bboxes_3d,
-                          gt_labels_3d,
-                          img_metas,
-                          gt_bboxes_ignore=None):
+    def forward_pts_train(
+        self, pts_feats, gt_bboxes_3d, gt_labels_3d, img_metas, gt_bboxes_ignore=None
+    ):
         """Forward function for point cloud branch.
         Args:
             pts_feats (list[torch.Tensor]): Features of point cloud branch
@@ -155,7 +176,7 @@ class SparseBEV(MVXTwoStageDetector):
 
         return losses
 
-    @force_fp32(apply_to=('img', 'points'))
+    @force_fp32(apply_to=("img", "points"))
     def forward(self, return_loss=True, **kwargs):
         """Calls either forward_train or forward_test depending on whether
         return_loss=True.
@@ -171,18 +192,20 @@ class SparseBEV(MVXTwoStageDetector):
         else:
             return self.forward_test(**kwargs)
 
-    def forward_train(self,
-                      points=None,
-                      img_metas=None,
-                      gt_bboxes_3d=None,
-                      gt_labels_3d=None,
-                      gt_labels=None,
-                      gt_bboxes=None,
-                      img=None,
-                      proposals=None,
-                      gt_bboxes_ignore=None,
-                      img_depth=None,
-                      img_mask=None):
+    def forward_train(
+        self,
+        points=None,
+        img_metas=None,
+        gt_bboxes_3d=None,
+        gt_labels_3d=None,
+        gt_labels=None,
+        gt_bboxes=None,
+        img=None,
+        proposals=None,
+        gt_bboxes_ignore=None,
+        img_depth=None,
+        img_mask=None,
+    ):
         """Forward training function.
         Args:
             points (list[torch.Tensor], optional): Points of each sample.
@@ -209,18 +232,19 @@ class SparseBEV(MVXTwoStageDetector):
         img_feats = self.extract_feat(img, img_metas)
 
         for i in range(len(img_metas)):
-            img_metas[i]['gt_bboxes_3d'] = gt_bboxes_3d[i]
-            img_metas[i]['gt_labels_3d'] = gt_labels_3d[i]
+            img_metas[i]["gt_bboxes_3d"] = gt_bboxes_3d[i]
+            img_metas[i]["gt_labels_3d"] = gt_labels_3d[i]
 
-        losses = self.forward_pts_train(img_feats, gt_bboxes_3d, gt_labels_3d, img_metas, gt_bboxes_ignore)
+        losses = self.forward_pts_train(
+            img_feats, gt_bboxes_3d, gt_labels_3d, img_metas, gt_bboxes_ignore
+        )
 
         return losses
 
     def forward_test(self, img_metas, img=None, **kwargs):
-        for var, name in [(img_metas, 'img_metas')]:
+        for var, name in [(img_metas, "img_metas")]:
             if not isinstance(var, list):
-                raise TypeError('{} must be a list, but got {}'.format(
-                    name, type(var)))
+                raise TypeError("{} must be a list, but got {}".format(name, type(var)))
         img = [img] if img is None else img
         return self.simple_test(img_metas[0], img[0], **kwargs)
 
@@ -234,7 +258,7 @@ class SparseBEV(MVXTwoStageDetector):
         ]
 
         return bbox_results
-    
+
     def simple_test(self, img_metas, img=None, rescale=False):
         world_size = get_dist_info()[1]
         if world_size == 1:  # online
@@ -248,7 +272,7 @@ class SparseBEV(MVXTwoStageDetector):
         bbox_list = [dict() for _ in range(len(img_metas))]
         bbox_pts = self.simple_test_pts(img_feats, img_metas, rescale=rescale)
         for result_dict, pts_bbox in zip(bbox_list, bbox_pts):
-            result_dict['pts_bbox'] = pts_bbox
+            result_dict["pts_bbox"] = pts_bbox
 
         return bbox_list
 
@@ -257,16 +281,16 @@ class SparseBEV(MVXTwoStageDetector):
         assert len(img_metas) == 1  # batch_size = 1
 
         B, N, C, H, W = img.shape
-        img = img.reshape(B, N//6, 6, C, H, W)
+        img = img.reshape(B, N // 6, 6, C, H, W)
 
-        img_filenames = img_metas[0]['filename']
+        img_filenames = img_metas[0]["filename"]
         num_frames = len(img_filenames) // 6
         # assert num_frames == img.shape[1]
 
         img_shape = (H, W, C)
-        img_metas[0]['img_shape'] = [img_shape for _ in range(len(img_filenames))]
-        img_metas[0]['ori_shape'] = [img_shape for _ in range(len(img_filenames))]
-        img_metas[0]['pad_shape'] = [img_shape for _ in range(len(img_filenames))]
+        img_metas[0]["img_shape"] = [img_shape for _ in range(len(img_filenames))]
+        img_metas[0]["ori_shape"] = [img_shape for _ in range(len(img_filenames))]
+        img_metas[0]["pad_shape"] = [img_shape for _ in range(len(img_filenames))]
 
         img_feats_list, img_metas_list = [], []
 
@@ -298,7 +322,9 @@ class SparseBEV(MVXTwoStageDetector):
         feat_levels = len(img_feats_list[0])
         img_feats_reorganized = []
         for j in range(feat_levels):
-            feat_l = torch.cat([img_feats_list[i][j] for i in range(len(img_feats_list))], dim=0)
+            feat_l = torch.cat(
+                [img_feats_list[i][j] for i in range(len(img_feats_list))], dim=0
+            )
             feat_l = feat_l.flatten(0, 1)[None, ...]
             img_feats_reorganized.append(feat_l)
 
@@ -316,6 +342,6 @@ class SparseBEV(MVXTwoStageDetector):
         bbox_list = [dict() for _ in range(1)]
         bbox_pts = self.simple_test_pts(img_feats, img_metas, rescale=rescale)
         for result_dict, pts_bbox in zip(bbox_list, bbox_pts):
-            result_dict['pts_bbox'] = pts_bbox
+            result_dict["pts_bbox"] = pts_bbox
 
         return bbox_list

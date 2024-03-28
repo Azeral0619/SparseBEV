@@ -28,20 +28,22 @@ class GridMask(nn.Module):
         st_w = np.random.randint(d)
 
         for i in range(hh // d):
-            s = d*i + st_h
+            s = d * i + st_h
             t = min(s + l, hh)
             mask[s:t, :] = 0
 
         for i in range(ww // d):
-            s = d*i + st_w
+            s = d * i + st_w
             t = min(s + l, ww)
             mask[:, s:t] = 0
 
-        mask = mask[(hh-h)//2:(hh-h)//2+h, (ww-w)//2:(ww-w)//2+w]
+        mask = mask[
+            (hh - h) // 2 : (hh - h) // 2 + h, (ww - w) // 2 : (ww - w) // 2 + w
+        ]
         mask = torch.tensor(mask, dtype=x.dtype, device=x.device)
         mask = 1 - mask
         mask = mask.expand_as(x)
-        x = x * mask 
+        x = x * mask
 
         return x.view(n, c, h, w)
 
@@ -63,24 +65,48 @@ def rotation_3d_in_axis(points, angles):
     ones = torch.ones_like(rot_cos)
     zeros = torch.zeros_like(rot_cos)
 
-    if VERSION.name == 'v0.17.1':
-        rot_mat_T = torch.stack([
-            rot_cos, -rot_sin, zeros,
-            rot_sin, rot_cos, zeros,
-            zeros, zeros, ones,
-        ]).transpose(0, 1).reshape(-1, 3, 3)
+    if VERSION.name == "v0.17.1":
+        rot_mat_T = (
+            torch.stack(
+                [
+                    rot_cos,
+                    -rot_sin,
+                    zeros,
+                    rot_sin,
+                    rot_cos,
+                    zeros,
+                    zeros,
+                    zeros,
+                    ones,
+                ]
+            )
+            .transpose(0, 1)
+            .reshape(-1, 3, 3)
+        )
     else:
-        rot_mat_T = torch.stack([
-            rot_cos, rot_sin, zeros,
-            -rot_sin, rot_cos, zeros,
-            zeros, zeros, ones,
-        ]).transpose(0, 1).reshape(-1, 3, 3)
+        rot_mat_T = (
+            torch.stack(
+                [
+                    rot_cos,
+                    rot_sin,
+                    zeros,
+                    -rot_sin,
+                    rot_cos,
+                    zeros,
+                    zeros,
+                    zeros,
+                    ones,
+                ]
+            )
+            .transpose(0, 1)
+            .reshape(-1, 3, 3)
+        )
 
     points = torch.bmm(points, rot_mat_T)
 
     if len(input_dims) > 1:
         points = points.reshape(*input_dims, n_points, 3)
-    
+
     return points
 
 
@@ -109,11 +135,15 @@ def pad_multiple(inputs, img_metas, size_divisor=32):
     pad_w = 0 if img_w % size_divisor == 0 else size_divisor - (img_w % size_divisor)
 
     B = len(img_metas)
-    N = len(img_metas[0]['ori_shape'])
+    N = len(img_metas[0]["ori_shape"])
 
     for b in range(B):
-        img_metas[b]['img_shape'] = [(img_h + pad_h, img_w + pad_w, 3) for _ in range(N)]
-        img_metas[b]['pad_shape'] = [(img_h + pad_h, img_w + pad_w, 3) for _ in range(N)]
+        img_metas[b]["img_shape"] = [
+            (img_h + pad_h, img_w + pad_w, 3) for _ in range(N)
+        ]
+        img_metas[b]["pad_shape"] = [
+            (img_h + pad_h, img_w + pad_w, 3) for _ in range(N)
+        ]
 
     if pad_h == 0 and pad_w == 0:
         return inputs
@@ -148,7 +178,9 @@ def rgb_to_hsv(image: torch.Tensor, eps: float = 1e-8) -> torch.Tensor:
         raise TypeError(f"Input type is not a torch.Tensor. Got {type(image)}")
 
     if len(image.shape) < 3 or image.shape[-3] != 3:
-        raise ValueError(f"Input size must have a shape of (*, 3, H, W). Got {image.shape}")
+        raise ValueError(
+            f"Input size must have a shape of (*, 3, H, W). Got {image.shape}"
+        )
 
     image = image / 255.0
 
@@ -195,7 +227,9 @@ def hsv_to_rgb(image: torch.Tensor) -> torch.Tensor:
         raise TypeError(f"Input type is not a torch.Tensor. Got {type(image)}")
 
     if len(image.shape) < 3 or image.shape[-3] != 3:
-        raise ValueError(f"Input size must have a shape of (*, 3, H, W). Got {image.shape}")
+        raise ValueError(
+            f"Input size must have a shape of (*, 3, H, W). Got {image.shape}"
+        )
 
     h: torch.Tensor = image[..., 0, :, :] / 360.0
     s: torch.Tensor = image[..., 1, :, :]
@@ -236,11 +270,13 @@ class GpuPhotoMetricDistortion:
         hue_delta (int): delta of hue.
     """
 
-    def __init__(self,
-                 brightness_delta=32,
-                 contrast_range=(0.5, 1.5),
-                 saturation_range=(0.5, 1.5),
-                 hue_delta=18):
+    def __init__(
+        self,
+        brightness_delta=32,
+        contrast_range=(0.5, 1.5),
+        saturation_range=(0.5, 1.5),
+        hue_delta=18,
+    ):
         self.brightness_delta = brightness_delta
         self.contrast_lower, self.contrast_upper = contrast_range
         self.saturation_lower, self.saturation_upper = saturation_range
@@ -278,7 +314,9 @@ class GpuPhotoMetricDistortion:
         for idx in range(imgs.shape[0]):
             # random saturation
             if random.randint(2):
-                imgs[idx, 1] *= random.uniform(self.saturation_lower, self.saturation_upper)
+                imgs[idx, 1] *= random.uniform(
+                    self.saturation_lower, self.saturation_upper
+                )
 
             # random hue
             if random.randint(2):
@@ -320,6 +358,7 @@ DUMP = DumpConfig()
 # for backward compatibility
 class Version:
     def __init__(self):
-        self.name = 'v1.0.0'
+        self.name = "v1.0.0"
+
 
 VERSION = Version()

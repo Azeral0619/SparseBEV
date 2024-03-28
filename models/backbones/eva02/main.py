@@ -19,7 +19,7 @@ class EVA02(nn.Module):
         embed_dim=768,
         depth=12,
         num_heads=12,
-        mlp_ratio=4*2/3,
+        mlp_ratio=4 * 2 / 3,
         qkv_bias=True,
         drop_path_rate=0.0,
         norm_layer=partial(nn.LayerNorm, eps=1e-6),
@@ -42,7 +42,7 @@ class EVA02(nn.Module):
         fpn_top_block=False,
         fpn_norm="LN",
         fpn_square_pad=0,
-        pretrained=None
+        pretrained=None,
     ):
         super().__init__()
 
@@ -80,12 +80,12 @@ class EVA02(nn.Module):
             square_pad=fpn_square_pad,
         )
         self.init_weights(pretrained)
-    
+
     def init_weights(self, pretrained=None):
         if pretrained is None:
             return
-        logging.info('Loading pretrained weights from %s' % pretrained)
-        state_dict = torch.load(pretrained)['model']
+        logging.info("Loading pretrained weights from %s" % pretrained)
+        state_dict = torch.load(pretrained)["model"]
         load_state_dict(self, state_dict, strict=False)
 
     def forward(self, x):

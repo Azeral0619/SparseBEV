@@ -36,7 +36,9 @@ def window_partition(x, window_size):
     Hp, Wp = H + pad_h, W + pad_w
 
     x = x.view(B, Hp // window_size, window_size, Wp // window_size, window_size, C)
-    windows = x.permute(0, 1, 3, 2, 4, 5).contiguous().view(-1, window_size, window_size, C)
+    windows = (
+        x.permute(0, 1, 3, 2, 4, 5).contiguous().view(-1, window_size, window_size, C)
+    )
     return windows, (Hp, Wp)
 
 
@@ -55,7 +57,9 @@ def window_unpartition(windows, window_size, pad_hw, hw):
     Hp, Wp = pad_hw
     H, W = hw
     B = windows.shape[0] // (Hp * Wp // window_size // window_size)
-    x = windows.view(B, Hp // window_size, Wp // window_size, window_size, window_size, -1)
+    x = windows.view(
+        B, Hp // window_size, Wp // window_size, window_size, window_size, -1
+    )
     x = x.permute(0, 1, 3, 2, 4, 5).contiguous().view(B, Hp, Wp, -1)
 
     if Hp > H or Wp > W:
@@ -110,9 +114,10 @@ def get_rel_pos(q_size, k_size, rel_pos):
             all_rel_pos_bias = []
             for i in range(rel_pos.shape[1]):
                 z = rel_pos[:, i].view(src_size).cpu().float().numpy()
-                f = interpolate.interp1d(x, z, kind='cubic', fill_value="extrapolate")
+                f = interpolate.interp1d(x, z, kind="cubic", fill_value="extrapolate")
                 all_rel_pos_bias.append(
-                    torch.Tensor(f(dx)).contiguous().view(-1, 1).to(rel_pos.device))
+                    torch.Tensor(f(dx)).contiguous().view(-1, 1).to(rel_pos.device)
+                )
             rel_pos_resized = torch.cat(all_rel_pos_bias, dim=-1)
     else:
         rel_pos_resized = rel_pos
@@ -151,7 +156,9 @@ def add_decomposed_rel_pos(attn, q, rel_pos_h, rel_pos_w, q_size, k_size):
     rel_w = torch.einsum("bhwc,wkc->bhwk", r_q, Rw)
 
     attn = (
-        attn.view(B, q_h, q_w, k_h, k_w) + rel_h[:, :, :, :, None] + rel_w[:, :, :, None, :]
+        attn.view(B, q_h, q_w, k_h, k_w)
+        + rel_h[:, :, :, :, None]
+        + rel_w[:, :, :, None, :]
     ).view(B, q_h * q_w, k_h * k_w)
 
     return attn
@@ -195,7 +202,12 @@ class PatchEmbed(nn.Module):
     """
 
     def __init__(
-        self, kernel_size=(16, 16), stride=(16, 16), padding=(0, 0), in_chans=3, embed_dim=768
+        self,
+        kernel_size=(16, 16),
+        stride=(16, 16),
+        padding=(0, 0),
+        in_chans=3,
+        embed_dim=768,
     ):
         """
         Args:
@@ -216,8 +228,6 @@ class PatchEmbed(nn.Module):
         # B C H W -> B H W C
         x = x.permute(0, 2, 3, 1)
         return x
-    
-
 
 
 from math import pi
@@ -228,28 +238,30 @@ from torch import nn
 from einops import rearrange, repeat
 
 
-def broadcat(tensors, dim = -1):
+def broadcat(tensors, dim=-1):
     num_tensors = len(tensors)
     shape_lens = set(list(map(lambda t: len(t.shape), tensors)))
-    assert len(shape_lens) == 1, 'tensors must all have the same number of dimensions'
+    assert len(shape_lens) == 1, "tensors must all have the same number of dimensions"
     shape_len = list(shape_lens)[0]
     dim = (dim + shape_len) if dim < 0 else dim
     dims = list(zip(*map(lambda t: list(t.shape), tensors)))
     expandable_dims = [(i, val) for i, val in enumerate(dims) if i != dim]
-    assert all([*map(lambda t: len(set(t[1])) <= 2, expandable_dims)]), 'invalid dimensions for broadcastable concatentation'
+    assert all(
+        [*map(lambda t: len(set(t[1])) <= 2, expandable_dims)]
+    ), "invalid dimensions for broadcastable concatentation"
     max_dims = list(map(lambda t: (t[0], max(t[1])), expandable_dims))
     expanded_dims = list(map(lambda t: (t[0], (t[1],) * num_tensors), max_dims))
     expanded_dims.insert(dim, (dim, dims[dim]))
     expandable_shapes = list(zip(*map(lambda t: t[1], expanded_dims)))
     tensors = list(map(lambda t: t[0].expand(*t[1]), zip(tensors, expandable_shapes)))
-    return torch.cat(tensors, dim = dim)
+    return torch.cat(tensors, dim=dim)
 
 
 def rotate_half(x):
-    x = rearrange(x, '... (d r) -> ... d r', r = 2)
-    x1, x2 = x.unbind(dim = -1)
-    x = torch.stack((-x2, x1), dim = -1)
-    return rearrange(x, '... d r -> ... (d r)')
+    x = rearrange(x, "... (d r) -> ... d r", r=2)
+    x1, x2 = x.unbind(dim=-1)
+    x = torch.stack((-x2, x1), dim=-1)
+    return rearrange(x, "... d r -> ... (d r)")
 
 
 class VisionRotaryEmbedding(nn.Module):
@@ -258,47 +270,56 @@ class VisionRotaryEmbedding(nn.Module):
         dim,
         pt_seq_len,
         ft_seq_len=None,
-        custom_freqs = None,
-        freqs_for = 'lang',
-        theta = 10000,
-        max_freq = 10,
-        num_freqs = 1,
+        custom_freqs=None,
+        freqs_for="lang",
+        theta=10000,
+        max_freq=10,
+        num_freqs=1,
     ):
         super().__init__()
         if custom_freqs:
             freqs = custom_freqs
-        elif freqs_for == 'lang':
-            freqs = 1. / (theta ** (torch.arange(0, dim, 2)[:(dim // 2)].float() / dim))
-        elif freqs_for == 'pixel':
-            freqs = torch.linspace(1., max_freq / 2, dim // 2) * pi
-        elif freqs_for == 'constant':
+        elif freqs_for == "lang":
+            freqs = 1.0 / (
+                theta ** (torch.arange(0, dim, 2)[: (dim // 2)].float() / dim)
+            )
+        elif freqs_for == "pixel":
+            freqs = torch.linspace(1.0, max_freq / 2, dim // 2) * pi
+        elif freqs_for == "constant":
             freqs = torch.ones(num_freqs).float()
         else:
-            raise ValueError(f'unknown modality {freqs_for}')
+            raise ValueError(f"unknown modality {freqs_for}")
 
-        if ft_seq_len is None: ft_seq_len = pt_seq_len
+        if ft_seq_len is None:
+            ft_seq_len = pt_seq_len
         t = torch.arange(ft_seq_len) / ft_seq_len * pt_seq_len
 
-        freqs_h = torch.einsum('..., f -> ... f', t, freqs)
-        freqs_h = repeat(freqs_h, '... n -> ... (n r)', r = 2)
+        freqs_h = torch.einsum("..., f -> ... f", t, freqs)
+        freqs_h = repeat(freqs_h, "... n -> ... (n r)", r=2)
 
-        freqs_w = torch.einsum('..., f -> ... f', t, freqs)
-        freqs_w = repeat(freqs_w, '... n -> ... (n r)', r = 2)
+        freqs_w = torch.einsum("..., f -> ... f", t, freqs)
+        freqs_w = repeat(freqs_w, "... n -> ... (n r)", r=2)
 
-        freqs = broadcat((freqs_h[:, None, :], freqs_w[None, :, :]), dim = -1)
+        freqs = broadcat((freqs_h[:, None, :], freqs_w[None, :, :]), dim=-1)
 
         self.register_buffer("freqs_cos", freqs.cos())
         self.register_buffer("freqs_sin", freqs.sin())
 
-        print('======== shape of rope freq', self.freqs_cos.shape, '========')
+        print("======== shape of rope freq", self.freqs_cos.shape, "========")
 
-    def forward(self, t, start_index = 0):
+    def forward(self, t, start_index=0):
         rot_dim = self.freqs_cos.shape[-1]
         end_index = start_index + rot_dim
-        assert rot_dim <= t.shape[-1], f'feature dimension {t.shape[-1]} is not of sufficient size to rotate in all the positions {rot_dim}'
-        t_left, t, t_right = t[..., :start_index], t[..., start_index:end_index], t[..., end_index:]
+        assert (
+            rot_dim <= t.shape[-1]
+        ), f"feature dimension {t.shape[-1]} is not of sufficient size to rotate in all the positions {rot_dim}"
+        t_left, t, t_right = (
+            t[..., :start_index],
+            t[..., start_index:end_index],
+            t[..., end_index:],
+        )
         t = (t * self.freqs_cos) + (rotate_half(t) * self.freqs_sin)
-        return torch.cat((t_left, t, t_right), dim = -1)
+        return torch.cat((t_left, t, t_right), dim=-1)
 
 
 class VisionRotaryEmbeddingFast(nn.Module):
@@ -307,35 +328,38 @@ class VisionRotaryEmbeddingFast(nn.Module):
         dim,
         pt_seq_len=16,
         ft_seq_len=None,
-        custom_freqs = None,
-        freqs_for = 'lang',
-        theta = 10000,
-        max_freq = 10,
-        num_freqs = 1,
-        real_img_size = None
+        custom_freqs=None,
+        freqs_for="lang",
+        theta=10000,
+        max_freq=10,
+        num_freqs=1,
+        real_img_size=None,
     ):
         super().__init__()
         if custom_freqs:
             freqs = custom_freqs
-        elif freqs_for == 'lang':
-            freqs = 1. / (theta ** (torch.arange(0, dim, 2)[:(dim // 2)].float() / dim))
-        elif freqs_for == 'pixel':
-            freqs = torch.linspace(1., max_freq / 2, dim // 2) * pi
-        elif freqs_for == 'constant':
+        elif freqs_for == "lang":
+            freqs = 1.0 / (
+                theta ** (torch.arange(0, dim, 2)[: (dim // 2)].float() / dim)
+            )
+        elif freqs_for == "pixel":
+            freqs = torch.linspace(1.0, max_freq / 2, dim // 2) * pi
+        elif freqs_for == "constant":
             freqs = torch.ones(num_freqs).float()
         else:
-            raise ValueError(f'unknown modality {freqs_for}')
+            raise ValueError(f"unknown modality {freqs_for}")
 
-        if ft_seq_len is None: ft_seq_len = pt_seq_len
+        if ft_seq_len is None:
+            ft_seq_len = pt_seq_len
         t = torch.arange(ft_seq_len) / ft_seq_len * pt_seq_len
 
-        freqs = torch.einsum('..., f -> ... f', t, freqs)
-        freqs = repeat(freqs, '... n -> ... (n r)', r = 2)
-        freqs = broadcat((freqs[:, None, :], freqs[None, :, :]), dim = -1)
+        freqs = torch.einsum("..., f -> ... f", t, freqs)
+        freqs = repeat(freqs, "... n -> ... (n r)", r=2)
+        freqs = broadcat((freqs[:, None, :], freqs[None, :, :]), dim=-1)
 
         freqs_cos = freqs.cos().view(-1, freqs.shape[-1])
         freqs_sin = freqs.sin().view(-1, freqs.shape[-1])
-        
+
         if real_img_size is not None:
             new_freqs_cos = F.interpolate(
                 freqs_cos.reshape(1, ft_seq_len, ft_seq_len, -1).permute(0, 3, 1, 2),
@@ -358,4 +382,6 @@ class VisionRotaryEmbeddingFast(nn.Module):
             self.register_buffer("freqs_sin", freqs_sin)
 
     def forward(self, t):
-        return t * self.freqs_cos[:, None, :] + rotate_half(t) * self.freqs_sin[:, None, :]
+        return (
+            t * self.freqs_cos[:, None, :] + rotate_half(t) * self.freqs_sin[:, None, :]
+        )

@@ -38,14 +38,14 @@ class PadMultiViewImage(object):
         return img
 
     def _pad_imgs(self, results):
-        padded_img = [self._pad_img(img) for img in results['img']]
-        
-        results['ori_shape'] = [img.shape for img in results['img']]
-        results['img'] = padded_img
-        results['img_shape'] = [img.shape for img in padded_img]
-        results['pad_shape'] = [img.shape for img in padded_img]
-        results['pad_fixed_size'] = self.size
-        results['pad_size_divisor'] = self.size_divisor
+        padded_img = [self._pad_img(img) for img in results["img"]]
+
+        results["ori_shape"] = [img.shape for img in results["img"]]
+        results["img"] = padded_img
+        results["img_shape"] = [img.shape for img in padded_img]
+        results["pad_shape"] = [img.shape for img in padded_img]
+        results["pad_fixed_size"] = self.size
+        results["pad_size_divisor"] = self.size_divisor
 
     def __call__(self, results):
         """Call function to pad images, masks, semantic segmentation maps.
@@ -59,9 +59,9 @@ class PadMultiViewImage(object):
 
     def __repr__(self):
         repr_str = self.__class__.__name__
-        repr_str += f'(size={self.size}, '
-        repr_str += f'size_divisor={self.size_divisor}, '
-        repr_str += f'pad_val={self.pad_val})'
+        repr_str += f"(size={self.size}, "
+        repr_str += f"size_divisor={self.size_divisor}, "
+        repr_str += f"pad_val={self.pad_val})"
         return repr_str
 
 
@@ -91,7 +91,7 @@ class NormalizeMultiviewImage(object):
         """
         normalized_imgs = []
 
-        for img in results['img']:
+        for img in results["img"]:
             img = img.astype(np.float32)
             if self.to_rgb:
                 img = img[..., ::-1]
@@ -99,17 +99,13 @@ class NormalizeMultiviewImage(object):
             img = img * self.std
             normalized_imgs.append(img)
 
-        results['img'] = normalized_imgs
-        results['img_norm_cfg'] = dict(
-            mean=self.mean,
-            std=self.std,
-            to_rgb=self.to_rgb
-        )
+        results["img"] = normalized_imgs
+        results["img_norm_cfg"] = dict(mean=self.mean, std=self.std, to_rgb=self.to_rgb)
         return results
 
     def __repr__(self):
         repr_str = self.__class__.__name__
-        repr_str += f'(mean={self.mean}, std={self.std}, to_rgb={self.to_rgb})'
+        repr_str += f"(mean={self.mean}, std={self.std}, to_rgb={self.to_rgb})"
         return repr_str
 
 
@@ -133,11 +129,13 @@ class PhotoMetricDistortionMultiViewImage:
         hue_delta (int): delta of hue.
     """
 
-    def __init__(self,
-                 brightness_delta=32,
-                 contrast_range=(0.5, 1.5),
-                 saturation_range=(0.5, 1.5),
-                 hue_delta=18):
+    def __init__(
+        self,
+        brightness_delta=32,
+        contrast_range=(0.5, 1.5),
+        saturation_range=(0.5, 1.5),
+        hue_delta=18,
+    ):
         self.brightness_delta = brightness_delta
         self.contrast_lower, self.contrast_upper = contrast_range
         self.saturation_lower, self.saturation_upper = saturation_range
@@ -150,7 +148,7 @@ class PhotoMetricDistortionMultiViewImage:
         Returns:
             dict: Result dict with images distorted.
         """
-        imgs = results['img']
+        imgs = results["img"]
         new_imgs = []
         for img in imgs:
             ori_dtype = img.dtype
@@ -158,8 +156,7 @@ class PhotoMetricDistortionMultiViewImage:
 
             # random brightness
             if random.randint(2):
-                delta = random.uniform(-self.brightness_delta,
-                                    self.brightness_delta)
+                delta = random.uniform(-self.brightness_delta, self.brightness_delta)
                 img += delta
 
             # mode == 0 --> do random contrast first
@@ -167,8 +164,7 @@ class PhotoMetricDistortionMultiViewImage:
             mode = random.randint(2)
             if mode == 1:
                 if random.randint(2):
-                    alpha = random.uniform(self.contrast_lower,
-                                        self.contrast_upper)
+                    alpha = random.uniform(self.contrast_lower, self.contrast_upper)
                     img *= alpha
 
             # convert color from BGR to HSV
@@ -176,8 +172,9 @@ class PhotoMetricDistortionMultiViewImage:
 
             # random saturation
             if random.randint(2):
-                img[..., 1] *= random.uniform(self.saturation_lower,
-                                            self.saturation_upper)
+                img[..., 1] *= random.uniform(
+                    self.saturation_lower, self.saturation_upper
+                )
 
             # random hue
             if random.randint(2):
@@ -191,8 +188,7 @@ class PhotoMetricDistortionMultiViewImage:
             # random contrast
             if mode == 0:
                 if random.randint(2):
-                    alpha = random.uniform(self.contrast_lower,
-                                        self.contrast_upper)
+                    alpha = random.uniform(self.contrast_lower, self.contrast_upper)
                     img *= alpha
 
             # randomly swap channels
@@ -201,17 +197,17 @@ class PhotoMetricDistortionMultiViewImage:
 
             new_imgs.append(img.astype(ori_dtype))
 
-        results['img'] = new_imgs
+        results["img"] = new_imgs
         return results
 
     def __repr__(self):
         repr_str = self.__class__.__name__
-        repr_str += f'(\nbrightness_delta={self.brightness_delta},\n'
-        repr_str += 'contrast_range='
-        repr_str += f'{(self.contrast_lower, self.contrast_upper)},\n'
-        repr_str += 'saturation_range='
-        repr_str += f'{(self.saturation_lower, self.saturation_upper)},\n'
-        repr_str += f'hue_delta={self.hue_delta})'
+        repr_str += f"(\nbrightness_delta={self.brightness_delta},\n"
+        repr_str += "contrast_range="
+        repr_str += f"{(self.contrast_lower, self.contrast_upper)},\n"
+        repr_str += "saturation_range="
+        repr_str += f"{(self.saturation_lower, self.saturation_upper)},\n"
+        repr_str += f"hue_delta={self.hue_delta})"
         return repr_str
 
 
@@ -223,11 +219,11 @@ class RandomTransformImage(object):
 
     def __call__(self, results):
         resize, resize_dims, crop, flip, rotate = self.sample_augmentation()
-        
-        if len(results['lidar2img']) == len(results['img']):
-            for i in range(len(results['img'])):
-                img = Image.fromarray(np.uint8(results['img'][i]))
-                
+
+        if len(results["lidar2img"]) == len(results["img"]):
+            for i in range(len(results["img"])):
+                img = Image.fromarray(np.uint8(results["img"][i]))
+
                 # resize, resize_dims, crop, flip, rotate = self._sample_augmentation()
                 img, ida_mat = self.img_transform(
                     img,
@@ -237,13 +233,13 @@ class RandomTransformImage(object):
                     flip=flip,
                     rotate=rotate,
                 )
-                results['img'][i] = np.array(img).astype(np.uint8)
-                results['lidar2img'][i] = ida_mat @ results['lidar2img'][i]
+                results["img"][i] = np.array(img).astype(np.uint8)
+                results["lidar2img"][i] = ida_mat @ results["lidar2img"][i]
 
-        elif len(results['img']) == 6:
-            for i in range(len(results['img'])):
-                img = Image.fromarray(np.uint8(results['img'][i]))
-                
+        elif len(results["img"]) == 6:
+            for i in range(len(results["img"])):
+                img = Image.fromarray(np.uint8(results["img"][i]))
+
                 # resize, resize_dims, crop, flip, rotate = self._sample_augmentation()
                 img, ida_mat = self.img_transform(
                     img,
@@ -253,17 +249,17 @@ class RandomTransformImage(object):
                     flip=flip,
                     rotate=rotate,
                 )
-                results['img'][i] = np.array(img).astype(np.uint8)
+                results["img"][i] = np.array(img).astype(np.uint8)
 
-            for i in range(len(results['lidar2img'])):
-                results['lidar2img'][i] = ida_mat @ results['lidar2img'][i]
+            for i in range(len(results["lidar2img"])):
+                results["lidar2img"][i] = ida_mat @ results["lidar2img"][i]
 
         else:
             raise ValueError()
 
-        results['ori_shape'] = [img.shape for img in results['img']]
-        results['img_shape'] = [img.shape for img in results['img']]
-        results['pad_shape'] = [img.shape for img in results['img']]
+        results["ori_shape"] = [img.shape for img in results["img"]]
+        results["img_shape"] = [img.shape for img in results["img"]]
+        results["pad_shape"] = [img.shape for img in results["img"]]
 
         return results
 
@@ -271,11 +267,14 @@ class RandomTransformImage(object):
         """
         https://github.com/Megvii-BaseDetection/BEVStereo/blob/master/dataset/nusc_mv_det_dataset.py#L48
         """
+
         def get_rot(h):
-            return torch.Tensor([
-                [np.cos(h), np.sin(h)],
-                [-np.sin(h), np.cos(h)],
-            ])
+            return torch.Tensor(
+                [
+                    [np.cos(h), np.sin(h)],
+                    [-np.sin(h), np.cos(h)],
+                ]
+            )
 
         ida_rot = torch.eye(2)
         ida_tran = torch.zeros(2)
@@ -290,13 +289,13 @@ class RandomTransformImage(object):
         # post-homography transformation
         ida_rot *= resize
         ida_tran -= torch.Tensor(crop[:2])
-        
+
         if flip:
             A = torch.Tensor([[-1, 0], [0, 1]])
             b = torch.Tensor([crop[2] - crop[0], 0])
             ida_rot = A.matmul(ida_rot)
             ida_tran = A.matmul(ida_tran) + b
-        
+
         A = get_rot(rotate / 180 * np.pi)
         b = torch.Tensor([crop[2] - crop[0], crop[3] - crop[1]]) / 2
         b = A.matmul(-b) + b
@@ -314,25 +313,28 @@ class RandomTransformImage(object):
         """
         https://github.com/Megvii-BaseDetection/BEVStereo/blob/master/dataset/nusc_mv_det_dataset.py#L247
         """
-        H, W = self.ida_aug_conf['H'], self.ida_aug_conf['W']
-        fH, fW = self.ida_aug_conf['final_dim']
+        H, W = self.ida_aug_conf["H"], self.ida_aug_conf["W"]
+        fH, fW = self.ida_aug_conf["final_dim"]
 
         if self.training:
-            resize = np.random.uniform(*self.ida_aug_conf['resize_lim'])
+            resize = np.random.uniform(*self.ida_aug_conf["resize_lim"])
             resize_dims = (int(W * resize), int(H * resize))
             newW, newH = resize_dims
-            crop_h = int((1 - np.random.uniform(*self.ida_aug_conf['bot_pct_lim'])) * newH) - fH
+            crop_h = (
+                int((1 - np.random.uniform(*self.ida_aug_conf["bot_pct_lim"])) * newH)
+                - fH
+            )
             crop_w = int(np.random.uniform(0, max(0, newW - fW)))
             crop = (crop_w, crop_h, crop_w + fW, crop_h + fH)
             flip = False
-            if self.ida_aug_conf['rand_flip'] and np.random.choice([0, 1]):
+            if self.ida_aug_conf["rand_flip"] and np.random.choice([0, 1]):
                 flip = True
-            rotate = np.random.uniform(*self.ida_aug_conf['rot_lim'])
+            rotate = np.random.uniform(*self.ida_aug_conf["rot_lim"])
         else:
             resize = max(fH / H, fW / W)
             resize_dims = (int(W * resize), int(H * resize))
             newW, newH = resize_dims
-            crop_h = int((1 - np.mean(self.ida_aug_conf['bot_pct_lim'])) * newH) - fH
+            crop_h = int((1 - np.mean(self.ida_aug_conf["bot_pct_lim"])) * newH) - fH
             crop_w = int(max(0, newW - fW) / 2)
             crop = (crop_w, crop_h, crop_w + fW, crop_h + fH)
             flip = False
@@ -343,10 +345,12 @@ class RandomTransformImage(object):
 
 @PIPELINES.register_module()
 class GlobalRotScaleTransImage(object):
-    def __init__(self,
-                 rot_range=[-0.3925, 0.3925],
-                 scale_ratio_range=[0.95, 1.05],
-                 translation_std=[0, 0, 0]):
+    def __init__(
+        self,
+        rot_range=[-0.3925, 0.3925],
+        scale_ratio_range=[0.95, 1.05],
+        translation_std=[0, 0, 0],
+    ):
         self.rot_range = rot_range
         self.scale_ratio_range = scale_ratio_range
         self.translation_std = translation_std
@@ -370,25 +374,33 @@ class GlobalRotScaleTransImage(object):
         rot_cos = torch.cos(torch.tensor(rot_angle))
         rot_sin = torch.sin(torch.tensor(rot_angle))
 
-        rot_mat = torch.tensor([
-            [rot_cos, -rot_sin, 0, 0],
-            [rot_sin, rot_cos, 0, 0],
-            [0, 0, 1, 0],
-            [0, 0, 0, 1],
-        ])
+        rot_mat = torch.tensor(
+            [
+                [rot_cos, -rot_sin, 0, 0],
+                [rot_sin, rot_cos, 0, 0],
+                [0, 0, 1, 0],
+                [0, 0, 0, 1],
+            ]
+        )
         rot_mat_inv = torch.inverse(rot_mat)
 
-        for view in range(len(results['lidar2img'])):
-            results['lidar2img'][view] = (torch.tensor(results['lidar2img'][view]).float() @ rot_mat_inv).numpy()
+        for view in range(len(results["lidar2img"])):
+            results["lidar2img"][view] = (
+                torch.tensor(results["lidar2img"][view]).float() @ rot_mat_inv
+            ).numpy()
 
     def scale_xyz(self, results, scale_ratio):
-        scale_mat = torch.tensor([
-            [scale_ratio, 0, 0, 0],
-            [0, scale_ratio, 0, 0],
-            [0, 0, scale_ratio, 0],
-            [0, 0, 0, 1],
-        ])
+        scale_mat = torch.tensor(
+            [
+                [scale_ratio, 0, 0, 0],
+                [0, scale_ratio, 0, 0],
+                [0, 0, scale_ratio, 0],
+                [0, 0, 0, 1],
+            ]
+        )
         scale_mat_inv = torch.inverse(scale_mat)
 
-        for view in range(len(results['lidar2img'])):
-            results['lidar2img'][view] = (torch.tensor(results['lidar2img'][view]).float() @ scale_mat_inv).numpy()
+        for view in range(len(results["lidar2img"])):
+            results["lidar2img"][view] = (
+                torch.tensor(results["lidar2img"][view]).float() @ scale_mat_inv
+            ).numpy()

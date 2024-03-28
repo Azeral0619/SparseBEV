@@ -63,7 +63,14 @@ class FrozenBatchNorm2d(nn.Module):
             )
 
     def _load_from_state_dict(
-        self, state_dict, prefix, local_metadata, strict, missing_keys, unexpected_keys, error_msgs
+        self,
+        state_dict,
+        prefix,
+        local_metadata,
+        strict,
+        missing_keys,
+        unexpected_keys,
+        error_msgs,
     ):
         version = local_metadata.get("version", None)
 
@@ -71,16 +78,26 @@ class FrozenBatchNorm2d(nn.Module):
             # No running_mean/var in early versions
             # This will silent the warnings
             if prefix + "running_mean" not in state_dict:
-                state_dict[prefix + "running_mean"] = torch.zeros_like(self.running_mean)
+                state_dict[prefix + "running_mean"] = torch.zeros_like(
+                    self.running_mean
+                )
             if prefix + "running_var" not in state_dict:
                 state_dict[prefix + "running_var"] = torch.ones_like(self.running_var)
 
         super()._load_from_state_dict(
-            state_dict, prefix, local_metadata, strict, missing_keys, unexpected_keys, error_msgs
+            state_dict,
+            prefix,
+            local_metadata,
+            strict,
+            missing_keys,
+            unexpected_keys,
+            error_msgs,
         )
 
     def __repr__(self):
-        return "FrozenBatchNorm2d(num_features={}, eps={})".format(self.num_features, self.eps)
+        return "FrozenBatchNorm2d(num_features={}, eps={})".format(
+            self.num_features, self.eps
+        )
 
     @classmethod
     def convert_frozen_batchnorm(cls, module):
@@ -139,7 +156,7 @@ def get_norm(norm, out_channels):
             "GN": lambda channels: nn.GroupNorm(32, channels),
             # for debugging:
             "nnSyncBN": nn.SyncBatchNorm,
-            "LN": lambda channels: LayerNorm(channels)
+            "LN": lambda channels: LayerNorm(channels),
         }[norm]
     return norm(out_channels)
 
