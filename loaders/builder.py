@@ -18,9 +18,8 @@ def build_dataloader(
     dist=True,
     shuffle=True,
     seed=None,
-    **kwargs
+    **kwargs,
 ):
-
     rank, world_size = get_dist_info()
     if dist:
         # DistributedGroupSampler will definitely shuffle the data to satisfy
@@ -54,7 +53,7 @@ def build_dataloader(
         collate_fn=partial(collate, samples_per_gpu=samples_per_gpu),
         pin_memory=False,
         worker_init_fn=init_fn,
-        **kwargs
+        **kwargs,
     )
 
     return data_loader

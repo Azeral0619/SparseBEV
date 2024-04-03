@@ -63,6 +63,7 @@ def main():
 
     logging.info("Creating model: %s" % cfgs.model.type)
     model = build_model(cfgs.model)
+    print(model)
     model.cuda()
 
     assert torch.cuda.device_count() == 1
