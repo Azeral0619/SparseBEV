@@ -5,6 +5,7 @@ import pickle
 import queue
 import signal
 import tkinter as tk
+import socketio
 import zlib
 from concurrent.futures import ThreadPoolExecutor
 
@@ -35,6 +36,11 @@ classname_to_color = {  # RGB
     "traffic_cone": (47, 79, 79),  # Darkslategrey
 }
 
+root = tk.Tk()
+window_size = (1920, 1080)
+root.geometry(f"{window_size[0]}x{window_size[1]}")
+label = tk.Label(root)
+label.pack()
 parser = argparse.ArgumentParser()
 val_dataset = None
 nusc = None
@@ -43,14 +49,12 @@ pool_request = ThreadPoolExecutor(1)
 args = None
 queue = queue.Queue()
 interrupted = False
-root = tk.Tk()
-window_size = (1920, 1080)
-root.geometry(f"{window_size[0]}x{window_size[1]}")
-label = tk.Label(root)
-label.pack()
+sio = socketio.Client()
+total = None
 
 
 def update_image(image):
+    global label, window_size
     image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
     image = image.resize(window_size)
     image = ImageTk.PhotoImage(image)
@@ -181,7 +185,6 @@ def render_response(result):
     )
     i = queue.get()
     viz_bbox_cv(nusc, bboxes_pred, val_dataset.data_infos[i])
-    pass
 
 
 def handle_response(response):
@@ -195,31 +198,104 @@ def handle_response(response):
             pool_render.submit(render_response, obj)
 
 
+@sio.event
+def connect():
+    logging.info("Connected to server")
+
+
+@sio.event
+def disconnect():
+    global total, queue
+    total = None
+    logging.info("Disconnected from server")
+    queue = queue.Queue()
+
+
+@sio.on("data")
+def generate_data_ws():
+    global val_dataset, nusc, sio, total
+    # parse configs
+    cfgs = Config.fromfile(args.config)
+
+    # register custom module
+    importlib.import_module("loaders")
+
+    set_random_seed(0, deterministic=True)
+
+    val_dataset = build_dataset(cfgs.data.val)
+    val_loader = build_dataloader(
+        val_dataset,
+        samples_per_gpu=1,
+        workers_per_gpu=cfgs.data.workers_per_gpu,
+        num_gpus=1,
+        dist=False,
+        shuffle=False,
+        seed=0,
+    )
+
+    if "mini" in cfgs.data.val.ann_file:
+        nusc = NuScenes(
+            version="v1.0-mini", dataroot=cfgs.data.val.data_root, verbose=False
+        )
+    else:
+        nusc = NuScenes(
+            version="v1.0-trainval", dataroot=cfgs.data.val.data_root, verbose=False
+        )
+    logging.info("Data loaded")
+
+    for i, data in enumerate(val_loader):
+        queue.put(i)
+        logging.info(f"Sending {i}th data")
+        sio.emit("detection", zlib.compress(pickle.dumps(data)))
+
+    total = len(val_loader)
+
+
+@sio.event
+def result(data):
+    result, count = pickle.loads(data)
+    # logging.info(f"Rendering {count}th data")
+    render_response(result)
+    if count == total:
+        sio.disconnect()
+
+
 def main():
-    global parser, args
+    global parser, args, sio, root, pool_request
     logging.getLogger().setLevel(logging.INFO)
     parser.add_argument("--url", type=str, default="http://127.0.0.1:8080/detection")
     parser.add_argument("--config", required=true)
     parser.add_argument("--score_threshold", default=0.3)
     parser.add_argument("--test", type=int, default=0)
+    parser.add_argument("--enable_ws", type=int, default=1)
     args = parser.parse_args()
-    if args.test == 0:
 
-        def task():
-            response = requests.post(args.url, data=generate_stream_data(), stream=True)
-            handle_response(response)
-
-        pool_request.submit(task())
+    if args.enable_ws == 1:
+        url = args.url.replace("/detection", "")  # .replace("http", "ws")
+        sio.connect(url, transports=["websocket"])
+        # pool_request.submit(generate_data_ws())
     else:
+        if args.test == 0:
 
-        def task():
-            url = args.url.replace("detection", "test")
-            response = requests.post(url, data=generate_test_stream_data(), stream=True)
-            for chunk in response.iter_content(chunk_size=512):
-                if chunk:
-                    print(chunk, flush=True)
+            def task():
+                response = requests.post(
+                    args.url, data=generate_stream_data(), stream=True
+                )
+                handle_response(response)
 
-        pool_request.submit(task()).result()
+            pool_request.submit(task())
+        else:
+
+            def task():
+                url = args.url.replace("detection", "test")
+                response = requests.post(
+                    url, data=generate_test_stream_data(), stream=True
+                )
+                for chunk in response.iter_content(chunk_size=512):
+                    if chunk:
+                        print(chunk, flush=True)
+
+            pool_request.submit(task()).result()
     root.mainloop()
 
 

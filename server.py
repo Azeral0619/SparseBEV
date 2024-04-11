@@ -1,22 +1,24 @@
 import argparse
+import logging
 import pickle
 import time
 import zlib
-from gevent import pywsgi
-
-from flask import Flask, Response, request
-import logging
 
 import torch
+from flask import Flask, Response, request
+from flask_socketio import SocketIO, emit
 
 from core import model
 
 app = Flask(__name__)
+socketio = SocketIO()
+socketio.init_app(app, cors_allowed_origins="*")
 core = None
+memory = {}
 
 
 @app.route("/detection", methods=["POST"])
-def run_model():
+def detection():
     """Run the model on the input data and return the results.
 
     Inputs:
@@ -76,6 +78,53 @@ def test():
     return Response(gen_result(request.stream), mimetype="application/octet-stream")
 
 
+@socketio.on("detection")
+def detection_ws(data):
+    """Run the model on the input data and return the results.
+
+    Inputs:
+        data
+    Outputs:
+        results
+    """
+    global memory
+    data = pickle.loads(zlib.decompress(data))
+    memory[request.sid]["count"] += 1
+    with torch.no_grad():
+        torch.cuda.synchronize()
+        logging.info(f"Processing {memory[request.sid]['count']}th data")
+        results = core(data)
+        torch.cuda.synchronize()
+    if memory[request.sid]["count"] != 0 and memory[request.sid]["count"] % 20 == 0:
+        logging.info(
+            f"Done sample [{memory[request.sid]['count']} / ?], "
+            f"fps: {0 if memory[request.sid]['count'] == 0 else (time.perf_counter() - memory[request.sid]['time']) / memory[request.sid]['count']:.1f} sample / s"
+        )
+    data = pickle.dumps((results, memory[request.sid]["count"]))
+    emit("result", data)
+
+
+@socketio.on("connect")
+def handle_connect():
+    global memory
+    memory[request.sid] = {}
+    memory[request.sid]["time"] = time.perf_counter()
+    memory[request.sid]["count"] = 0
+    logging.info("Connected to client")
+    emit("data")
+
+
+@socketio.on("disconnect")
+def handle_disconnect():
+    global memory
+    logging.info(
+        f"Done sample [{memory[request.sid]['count']} / {memory[request.sid]['count']}], "
+        f"fps: {0 if memory[request.sid]['count'] == 0 else (time.perf_counter() - memory[request.sid]['time']) / memory[request.sid]['count']:.1f} sample / s"
+    )
+    del memory[request.sid]
+    logging.info("Disconnected from client")
+
+
 def main():
     global core
     parser = argparse.ArgumentParser(description="Validate a detector")
@@ -87,8 +136,9 @@ def main():
     parser.add_argument("--port", type=int, default=8080)
     args = parser.parse_args()
     core = model(args=args)
-    server = pywsgi.WSGIServer(("0.0.0.0", args.port), app)
-    server.serve_forever()
+    socketio.run(app, host="0.0.0.0", port=args.port)
+    # server = pywsgi.WSGIServer(("0.0.0.0", args.port), app)
+    # server.serve_forever()
 
 
 if __name__ == "__main__":
