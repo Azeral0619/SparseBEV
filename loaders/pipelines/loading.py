@@ -15,7 +15,6 @@ def compose_lidar2img(
     sensor2global_rotation_past,
     cam_intrinsic_past,
 ):
-
     R = sensor2global_rotation_past @ (
         inv(ego2global_rotation_curr).T @ inv(lidar2ego_rotation_curr).T
     )

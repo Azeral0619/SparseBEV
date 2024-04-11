@@ -282,12 +282,9 @@ class SparseBEV(MVXTwoStageDetector):
 
         B, N, C, H, W = img.shape
         img = img.reshape(B, N // 6, 6, C, H, W)
-        # TODO: modify to adapt to multi-view images
 
         img_filenames = img_metas[0]["filename"]
-        num_frames = (
-            len(img_filenames) // 6
-        )  # TODO: modify to adapt to multi-view images
+        num_frames = len(img_filenames) // 6
         # assert num_frames == img.shape[1]
 
         img_shape = (H, W, C)
@@ -299,9 +296,7 @@ class SparseBEV(MVXTwoStageDetector):
 
         # extract feature frame by frame
         for i in range(num_frames):
-            img_indices = list(
-                np.arange(i * 6, (i + 1) * 6)
-            )  # TODO: modify to adapt to multi-view images
+            img_indices = list(np.arange(i * 6, (i + 1) * 6))
 
             img_metas_curr = [{}]
             for k in img_metas[0].keys():

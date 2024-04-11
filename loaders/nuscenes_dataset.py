@@ -6,8 +6,8 @@ from pyquaternion import Quaternion
 
 
 @DATASETS.register_module()
-class CustomNuScenesDataset(NuScenesDataset):
-
+class CustomNuScenesDataset(NuScenesDataset): 
+    
     def collect_sweeps(self, index, into_past=60, into_future=60):
         all_sweeps_prev = []
         curr_index = index
