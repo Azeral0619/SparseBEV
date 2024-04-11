@@ -2,7 +2,7 @@ import argparse
 import importlib
 import logging
 import pickle
-import queue
+from queue import Queue
 import signal
 import tkinter as tk
 import socketio
@@ -47,7 +47,7 @@ nusc = None
 pool_render = ThreadPoolExecutor(1)
 pool_request = ThreadPoolExecutor(1)
 args = None
-queue = queue.Queue()
+queue = Queue()
 interrupted = False
 sio = socketio.Client()
 total = None
@@ -208,7 +208,7 @@ def disconnect():
     global total, queue
     total = None
     logging.info("Disconnected from server")
-    queue = queue.Queue()
+    queue = Queue()
 
 
 @sio.on("data")
@@ -272,7 +272,7 @@ def main():
 
     if args.enable_ws == 1:
         url = args.url.replace("/detection", "")  # .replace("http", "ws")
-        sio.connect(url, transports=["websocket"])
+        sio.connect(url, transports=["polling"])
         # pool_request.submit(generate_data_ws())
     else:
         if args.test == 0:
