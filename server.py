@@ -26,42 +26,15 @@ def detection():
     Outputs:
         results
     """
-
-    def gen_result(stream):
-        global core
-        temp_data = bytearray()
-        i = 0
-        start = time.perf_counter()
-        while True:
-            chunk = stream.read(4 * 1024 * 1024)
-            if not chunk:
-                break
-            temp_data.extend(chunk)
-            while b"--data-boundary--" in temp_data:
-                if i != 0:
-                    yield b"--result-boundary--"
-                obj, temp_data = temp_data.split(b"--data-boundary--", 1)
-                obj = pickle.loads(zlib.decompress(obj))
-
-                with torch.no_grad():
-                    torch.cuda.synchronize()
-                    logging.info(f"Processing {i}th data")
-                    results = core(obj)
-                    torch.cuda.synchronize()
-                if i != 0 and i % 20 == 0:
-                    logging.info(
-                        f"Done sample [{i} / ?], "
-                        f"fps: {(time.perf_counter() - start) / i:.1f} sample / s"
-                    )
-                obj = pickle.dumps(results)
-                yield obj
-                i += 1
-        logging.info(
-            f"Done sample [{i} / {i}], "
-            f"fps: {(time.perf_counter() - start) / i:.1f} sample / s"
-        )
-
-    return Response(gen_result(request.stream), mimetype="application/octet-stream")
+    data = request.data
+    data = pickle.loads(zlib.decompress(data))
+    with torch.no_grad():
+        torch.cuda.synchronize()
+        logging.info("Processing data")
+        results = core(data)
+        torch.cuda.synchronize()
+    data = pickle.dumps(results)
+    return Response(data, mimetype="application/octet-stream")
 
 
 @app.route("/test", methods=["POST"])
@@ -136,7 +109,7 @@ def main():
     parser.add_argument("--port", type=int, default=8080)
     args = parser.parse_args()
     core = model(args=args)
-    socketio.run(app, host="0.0.0.0", port=args.port)
+    socketio.run(app, host="0.0.0.0", port=args.port, debug=True)
     # server = pywsgi.WSGIServer(("0.0.0.0", args.port), app)
     # server.serve_forever()
 

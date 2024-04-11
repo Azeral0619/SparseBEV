@@ -1,10 +1,12 @@
 import argparse
+import asyncio
 import importlib
 import logging
 import pickle
 from queue import Queue
 import signal
 import tkinter as tk
+import httpx
 import socketio
 import zlib
 from concurrent.futures import ThreadPoolExecutor
@@ -43,14 +45,18 @@ label = tk.Label(root)
 label.pack()
 parser = argparse.ArgumentParser()
 val_dataset = None
+val_loader = None
 nusc = None
 pool_render = ThreadPoolExecutor(1)
 pool_request = ThreadPoolExecutor(1)
 args = None
 queue = Queue()
+resp_queue = Queue()
 interrupted = False
 sio = socketio.Client()
+client = httpx.Client()
 total = None
+responses = []
 
 
 def update_image(image):
@@ -116,8 +122,16 @@ def viz_bbox_cv(nusc, bboxes, data_info):
     update_image(canvas)
 
 
+def handle_request(url, data):
+    global client
+    response = client.post(
+        url, content=data, headers={"Content-Type": "application/octet-stream"}
+    )
+    return pickle.loads(response.content)
+
+
 def generate_stream_data():
-    global val_dataset
+    global val_dataset, val_loader
     global nusc
     # parse configs
     cfgs = Config.fromfile(args.config)
@@ -149,13 +163,9 @@ def generate_stream_data():
     logging.info("Data loaded")
 
     for i, data in enumerate(val_loader):
-        # if i == 10:
-        #    break
-        if i != 0:
-            yield b"--data-boundary--"
-        queue.put(i)
         logging.info(f"Sending {i}th data")
-        yield zlib.compress(pickle.dumps(data))
+        resp_queue.put(handle_request(args.url, zlib.compress(pickle.dumps(data))))
+        queue.put(i)
 
 
 def generate_test_stream_data():
@@ -187,15 +197,10 @@ def render_response(result):
     viz_bbox_cv(nusc, bboxes_pred, val_dataset.data_infos[i])
 
 
-def handle_response(response):
-    temp_data = bytearray()
-    for chunk in response.iter_content(chunk_size=1024 * 1024):
-        if chunk:
-            temp_data.extend(chunk)
-        while b"--result-boundary--" in temp_data:
-            obj, temp_data = temp_data.split(b"--result-boundary--", 1)
-            obj = pickle.loads(obj)
-            pool_render.submit(render_response, obj)
+def handle_response():
+    global val_loader
+    for _ in val_loader:
+        render_response(resp_queue.get())
 
 
 @sio.event
@@ -267,23 +272,17 @@ def main():
     parser.add_argument("--config", required=true)
     parser.add_argument("--score_threshold", default=0.3)
     parser.add_argument("--test", type=int, default=0)
-    parser.add_argument("--enable_ws", type=int, default=1)
+    parser.add_argument("--enable_ws", type=int, default=0)
     args = parser.parse_args()
 
     if args.enable_ws == 1:
         url = args.url.replace("/detection", "")  # .replace("http", "ws")
-        sio.connect(url, transports=["polling"])
+        sio.connect(url, transports=["websocket"])
         # pool_request.submit(generate_data_ws())
     else:
         if args.test == 0:
-
-            def task():
-                response = requests.post(
-                    args.url, data=generate_stream_data(), stream=True
-                )
-                handle_response(response)
-
-            pool_request.submit(task())
+            pool_request.submit(generate_stream_data)
+            pool_render.submit(handle_response)
         else:
 
             def task():
