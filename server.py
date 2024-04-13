@@ -6,7 +6,7 @@ import zlib
 
 import torch
 from flask import Flask, Response, request
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO, emit, disconnect
 
 from core import model
 
@@ -61,6 +61,9 @@ def detection_ws(data):
         results
     """
     global memory
+    if data is None:
+        disconnect()
+        return
     data = pickle.loads(zlib.decompress(data))
     memory[request.sid]["count"] += 1
     with torch.no_grad():
@@ -73,7 +76,8 @@ def detection_ws(data):
             f"Done sample [{memory[request.sid]['count']} / ?], "
             f"fps: {0 if memory[request.sid]['count'] == 0 else (time.perf_counter() - memory[request.sid]['time']) / memory[request.sid]['count']:.1f} sample / s"
         )
-    data = pickle.dumps((results, memory[request.sid]["count"]))
+    data = pickle.dumps(results)
+    return data
     emit("result", data)
 
 
@@ -96,6 +100,7 @@ def handle_disconnect():
     )
     del memory[request.sid]
     logging.info("Disconnected from client")
+    disconnect()
 
 
 def main():

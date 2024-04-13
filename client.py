@@ -1,19 +1,18 @@
 import argparse
-import asyncio
 import importlib
 import logging
 import pickle
-from queue import Queue
 import signal
 import tkinter as tk
-import httpx
-import socketio
 import zlib
 from concurrent.futures import ThreadPoolExecutor
+from queue import Queue
 
 import cv2
+import httpx
 import numpy as np
 import requests
+import socketio
 from mmcv import Config
 from mmdet.apis import set_random_seed
 from mmdet3d.datasets import build_dataloader, build_dataset
@@ -53,7 +52,7 @@ args = None
 queue = Queue()
 resp_queue = Queue()
 interrupted = False
-sio = socketio.Client()
+sio = socketio.Client(logger=True, engineio_logger=True)
 client = httpx.Client()
 total = None
 responses = []
@@ -210,15 +209,14 @@ def connect():
 
 @sio.event
 def disconnect():
-    global total, queue
-    total = None
+    global queue
     logging.info("Disconnected from server")
     queue = Queue()
 
 
 @sio.on("data")
 def generate_data_ws():
-    global val_dataset, nusc, sio, total
+    global val_dataset, nusc, sio
     # parse configs
     cfgs = Config.fromfile(args.config)
 
@@ -253,16 +251,14 @@ def generate_data_ws():
         logging.info(f"Sending {i}th data")
         sio.emit("detection", zlib.compress(pickle.dumps(data)))
 
-    total = len(val_loader)
+    sio.emit("detection", None)
 
 
 @sio.event
 def result(data):
-    result, count = pickle.loads(data)
+    result = pickle.loads(data)
     # logging.info(f"Rendering {count}th data")
     render_response(result)
-    if count == total:
-        sio.disconnect()
 
 
 def main():
