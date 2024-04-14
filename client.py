@@ -52,7 +52,7 @@ args = None
 queue = Queue()
 resp_queue = Queue()
 interrupted = False
-sio = socketio.Client(logger=True, engineio_logger=True)
+sio = socketio.Client(logger=True)
 client = httpx.Client()
 total = None
 responses = []
@@ -202,12 +202,12 @@ def handle_response():
         render_response(resp_queue.get())
 
 
-@sio.event
+@sio.on("connect")
 def connect():
     logging.info("Connected to server")
 
 
-@sio.event
+@sio.on("disconnect")
 def disconnect():
     global queue
     logging.info("Disconnected from server")
@@ -251,10 +251,10 @@ def generate_data_ws():
         logging.info(f"Sending {i}th data")
         sio.emit("detection", zlib.compress(pickle.dumps(data)))
 
-    sio.emit("detection", None)
+    sio.emit("detection", "")
 
 
-@sio.event
+@sio.on("result")
 def result(data):
     result = pickle.loads(data)
     # logging.info(f"Rendering {count}th data")

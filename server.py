@@ -11,7 +11,7 @@ from flask_socketio import SocketIO, emit, disconnect
 from core import model
 
 app = Flask(__name__)
-socketio = SocketIO()
+socketio = SocketIO(logger=True, ping_timeout=600)
 socketio.init_app(app, cors_allowed_origins="*")
 core = None
 memory = {}
@@ -51,6 +51,11 @@ def test():
     return Response(gen_result(request.stream), mimetype="application/octet-stream")
 
 
+@app.route("/info", methods=["GET"])
+def info():
+    return "Real-time 3D object detection server"
+
+
 @socketio.on("detection")
 def detection_ws(data):
     """Run the model on the input data and return the results.
@@ -61,7 +66,7 @@ def detection_ws(data):
         results
     """
     global memory
-    if data is None:
+    if len(data) == 0:
         disconnect()
         return
     data = pickle.loads(zlib.decompress(data))
@@ -77,7 +82,6 @@ def detection_ws(data):
             f"fps: {0 if memory[request.sid]['count'] == 0 else (time.perf_counter() - memory[request.sid]['time']) / memory[request.sid]['count']:.1f} sample / s"
         )
     data = pickle.dumps(results)
-    return data
     emit("result", data)
 
 
@@ -94,6 +98,9 @@ def handle_connect():
 @socketio.on("disconnect")
 def handle_disconnect():
     global memory
+    logging.info(
+        f"Connected for {time.perf_counter() - memory[request.sid]['time']:.1f} s"
+    )
     logging.info(
         f"Done sample [{memory[request.sid]['count']} / {memory[request.sid]['count']}], "
         f"fps: {0 if memory[request.sid]['count'] == 0 else (time.perf_counter() - memory[request.sid]['time']) / memory[request.sid]['count']:.1f} sample / s"
