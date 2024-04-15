@@ -2,16 +2,15 @@ import argparse
 import importlib
 import logging
 import pickle
-import signal
 import tkinter as tk
 import zlib
 from concurrent.futures import ThreadPoolExecutor
 from queue import Queue
 
+import asyncio
 import cv2
 import httpx
 import numpy as np
-import requests
 import socketio
 from mmcv import Config
 from mmdet.apis import set_random_seed
@@ -20,7 +19,6 @@ from nuscenes.nuscenes import NuScenes
 from nuscenes.utils.geometry_utils import box_in_image
 from PIL import Image, ImageTk
 from pyquaternion import Quaternion
-from sympy import true
 
 from viz_bbox_predictions import convert_to_nusc_box
 
@@ -51,11 +49,8 @@ pool_request = ThreadPoolExecutor(1)
 args = None
 queue = Queue()
 resp_queue = Queue()
-interrupted = False
 sio = socketio.Client(logger=True)
-client = httpx.Client()
-total = None
-responses = []
+client = httpx.AsyncClient()
 
 
 def update_image(image):
@@ -121,66 +116,29 @@ def viz_bbox_cv(nusc, bboxes, data_info):
     update_image(canvas)
 
 
-def handle_request(url, data):
+async def handle_request(url, index, data):
     global client
-    response = client.post(
+    logging.info(f"Sending {index}th data")
+    response = await client.post(
         url, content=data, headers={"Content-Type": "application/octet-stream"}
     )
-    return pickle.loads(response.content)
+    result = pickle.loads(zlib.decompress(response.content))
+    queue.put(index)
+    render_response(result)
 
 
-def generate_stream_data():
-    global val_dataset, val_loader
-    global nusc
-    # parse configs
-    cfgs = Config.fromfile(args.config)
+async def generate_stream_data():
+    global val_loader, args
 
-    # register custom module
-    importlib.import_module("loaders")
-
-    set_random_seed(0, deterministic=True)
-
-    val_dataset = build_dataset(cfgs.data.val)
-    val_loader = build_dataloader(
-        val_dataset,
-        samples_per_gpu=1,
-        workers_per_gpu=cfgs.data.workers_per_gpu,
-        num_gpus=1,
-        dist=False,
-        shuffle=False,
-        seed=0,
-    )
-
-    if "mini" in cfgs.data.val.ann_file:
-        nusc = NuScenes(
-            version="v1.0-mini", dataroot=cfgs.data.val.data_root, verbose=False
-        )
-    else:
-        nusc = NuScenes(
-            version="v1.0-trainval", dataroot=cfgs.data.val.data_root, verbose=False
-        )
-    logging.info("Data loaded")
-
-    for i, data in enumerate(val_loader):
-        logging.info(f"Sending {i}th data")
-        resp_queue.put(handle_request(args.url, zlib.compress(pickle.dumps(data))))
-        queue.put(i)
-
-
-def generate_test_stream_data():
-    global interrupted
-
-    def signal_handler(sig, frame):
-        global interrupted
-        interrupted = True
-        signal.signal(signal.SIGINT, signal.SIG_DFL)
-
-    signal.signal(signal.SIGINT, signal_handler)
-
-    while not interrupted:
-        # 无限循环 a-z
-        for i in range(97, 123):
-            yield bytes([i])
+    tasks = [
+        handle_request(args.url, i, zlib.compress(pickle.dumps(data)))
+        for i, data in enumerate(val_loader)
+    ]
+    await asyncio.gather(*tasks)
+    # for i, data in enumerate(val_loader):
+    #    logging.info(f"Sending {i}th data")
+    #    resp_queue.put(handle_request(args.url, zlib.compress(pickle.dumps(data))))
+    #    queue.put(i)
 
 
 def render_response(result):
@@ -196,15 +154,28 @@ def render_response(result):
     viz_bbox_cv(nusc, bboxes_pred, val_dataset.data_infos[i])
 
 
-def handle_response():
+"""
+async def handle_response():
     global val_loader
-    for _ in val_loader:
-        render_response(resp_queue.get())
+
+    async def task():
+        i, result = await async_resp_queue.get()
+        result = pickle.loads(zlib.decompress(result.content))
+        queue.put(i)
+        render_response(result)
+
+    tasks = [task() for i in range(len(val_loader))]
+    await asyncio.gather(*tasks)
+    # for i in range(len(val_loader)):
+    #    logging.info(f"Rendering {i}th data")
+    #    render_response(resp_queue.get())
+"""
 
 
 @sio.on("connect")
 def connect():
     logging.info("Connected to server")
+    # generate_data_ws()
 
 
 @sio.on("disconnect")
@@ -214,9 +185,13 @@ def disconnect():
     queue = Queue()
 
 
-@sio.on("data")
-def generate_data_ws():
-    global val_dataset, nusc, sio
+@sio.on("ping")
+def ping():
+    sio.emit("pong")
+
+
+def load_data():
+    global val_dataset, val_loader, nusc, sio
     # parse configs
     cfgs = Config.fromfile(args.config)
 
@@ -245,6 +220,11 @@ def generate_data_ws():
             version="v1.0-trainval", dataroot=cfgs.data.val.data_root, verbose=False
         )
     logging.info("Data loaded")
+
+
+# @sio.on("data")
+def generate_data_ws():
+    global val_loader, queue, sio
 
     for i, data in enumerate(val_loader):
         queue.put(i)
@@ -263,34 +243,27 @@ def result(data):
 
 def main():
     global parser, args, sio, root, pool_request
-    logging.getLogger().setLevel(logging.INFO)
+    logging.basicConfig(level=logging.INFO)
     parser.add_argument("--url", type=str, default="http://127.0.0.1:8080/detection")
-    parser.add_argument("--config", required=true)
+    parser.add_argument("--config", required=True)
     parser.add_argument("--score_threshold", default=0.3)
-    parser.add_argument("--test", type=int, default=0)
-    parser.add_argument("--enable_ws", type=int, default=0)
+    parser.add_argument("--enable_ws", type=int, default=1)
     args = parser.parse_args()
+    load_data()
 
     if args.enable_ws == 1:
         url = args.url.replace("/detection", "")  # .replace("http", "ws")
-        sio.connect(url, transports=["websocket"])
+        sio.connect(url)
+        generate_data_ws()
         # pool_request.submit(generate_data_ws())
     else:
-        if args.test == 0:
-            pool_request.submit(generate_stream_data)
-            pool_render.submit(handle_response)
-        else:
+        # pool_render.submit(handle_response)
+        # pool_request.submit(generate_stream_data)
+        def task_req():
+            asyncio.run(generate_stream_data())
 
-            def task():
-                url = args.url.replace("detection", "test")
-                response = requests.post(
-                    url, data=generate_test_stream_data(), stream=True
-                )
-                for chunk in response.iter_content(chunk_size=512):
-                    if chunk:
-                        print(chunk, flush=True)
+        pool_request.submit(task_req)
 
-            pool_request.submit(task()).result()
     root.mainloop()
 
 

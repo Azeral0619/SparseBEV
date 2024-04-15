@@ -67,6 +67,7 @@ def detection_ws(data):
     """
     global memory
     if len(data) == 0:
+        logging.info("All data are received")
         disconnect()
         return
     data = pickle.loads(zlib.decompress(data))
@@ -92,15 +93,17 @@ def handle_connect():
     memory[request.sid]["time"] = time.perf_counter()
     memory[request.sid]["count"] = 0
     logging.info("Connected to client")
-    emit("data")
+    # emit("data")
+
+
+@socketio.on("pong")
+def pong():
+    emit("ping")
 
 
 @socketio.on("disconnect")
 def handle_disconnect():
     global memory
-    logging.info(
-        f"Connected for {time.perf_counter() - memory[request.sid]['time']:.1f} s"
-    )
     logging.info(
         f"Done sample [{memory[request.sid]['count']} / {memory[request.sid]['count']}], "
         f"fps: {0 if memory[request.sid]['count'] == 0 else (time.perf_counter() - memory[request.sid]['time']) / memory[request.sid]['count']:.1f} sample / s"
