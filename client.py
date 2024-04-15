@@ -7,7 +7,6 @@ import zlib
 from concurrent.futures import ThreadPoolExecutor
 from queue import Queue
 
-import asyncio
 import cv2
 import httpx
 import numpy as np
@@ -44,7 +43,7 @@ parser = argparse.ArgumentParser()
 val_dataset = None
 val_loader = None
 nusc = None
-pool_render = ThreadPoolExecutor(2)
+pool_render = ThreadPoolExecutor(4)
 pool_request = ThreadPoolExecutor(1)
 args = None
 queue = Queue()

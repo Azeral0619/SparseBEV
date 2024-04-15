@@ -6,7 +6,7 @@ import zlib
 
 import torch
 from flask import Flask, Response, request
-from flask_socketio import SocketIO, emit, disconnect
+from flask_socketio import SocketIO, disconnect, emit
 
 from core import model
 
@@ -28,11 +28,7 @@ def detection():
     """
     data = request.data
     data = pickle.loads(zlib.decompress(data))
-    with torch.no_grad():
-        torch.cuda.synchronize()
-        logging.info("Processing data")
-        results = core(data)
-        torch.cuda.synchronize()
+    results = core(data)
     data = pickle.dumps(results)
     return Response(data, mimetype="application/octet-stream")
 
