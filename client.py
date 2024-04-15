@@ -44,13 +44,13 @@ parser = argparse.ArgumentParser()
 val_dataset = None
 val_loader = None
 nusc = None
-pool_render = ThreadPoolExecutor(1)
+pool_render = ThreadPoolExecutor(2)
 pool_request = ThreadPoolExecutor(1)
 args = None
 queue = Queue()
 resp_queue = Queue()
 sio = socketio.Client(logger=True)
-client = httpx.AsyncClient()
+client = httpx.Client()
 
 
 def update_image(image):
@@ -116,29 +116,24 @@ def viz_bbox_cv(nusc, bboxes, data_info):
     update_image(canvas)
 
 
-async def handle_request(url, index, data):
+def handle_request(url, index, data):
     global client
     logging.info(f"Sending {index}th data")
-    response = await client.post(
+    response = client.post(
         url, content=data, headers={"Content-Type": "application/octet-stream"}
     )
-    result = pickle.loads(zlib.decompress(response.content))
+    result = pickle.loads(response.content)
     queue.put(index)
     render_response(result)
 
 
-async def generate_stream_data():
+def generate_stream_data():
     global val_loader, args
 
-    tasks = [
-        handle_request(args.url, i, zlib.compress(pickle.dumps(data)))
-        for i, data in enumerate(val_loader)
-    ]
-    await asyncio.gather(*tasks)
-    # for i, data in enumerate(val_loader):
-    #    logging.info(f"Sending {i}th data")
-    #    resp_queue.put(handle_request(args.url, zlib.compress(pickle.dumps(data))))
-    #    queue.put(i)
+    for i, data in enumerate(val_loader):
+        pool_render.submit(
+            handle_request, args.url, i, zlib.compress(pickle.dumps(data))
+        )
 
 
 def render_response(result):
@@ -152,24 +147,6 @@ def render_response(result):
     )
     i = queue.get()
     viz_bbox_cv(nusc, bboxes_pred, val_dataset.data_infos[i])
-
-
-"""
-async def handle_response():
-    global val_loader
-
-    async def task():
-        i, result = await async_resp_queue.get()
-        result = pickle.loads(zlib.decompress(result.content))
-        queue.put(i)
-        render_response(result)
-
-    tasks = [task() for i in range(len(val_loader))]
-    await asyncio.gather(*tasks)
-    # for i in range(len(val_loader)):
-    #    logging.info(f"Rendering {i}th data")
-    #    render_response(resp_queue.get())
-"""
 
 
 @sio.on("connect")
@@ -254,15 +231,9 @@ def main():
     if args.enable_ws == 1:
         url = args.url.replace("/detection", "")  # .replace("http", "ws")
         sio.connect(url)
-        generate_data_ws()
-        # pool_request.submit(generate_data_ws())
+        pool_request.submit(generate_data_ws)
     else:
-        # pool_render.submit(handle_response)
-        # pool_request.submit(generate_stream_data)
-        def task_req():
-            asyncio.run(generate_stream_data())
-
-        pool_request.submit(task_req)
+        pool_request.submit(generate_stream_data)
 
     root.mainloop()
 

@@ -10,13 +10,14 @@ from mmcv.parallel import MMDataParallel, MMDistributedDataParallel
 from mmcv.runner import load_checkpoint
 from mmdet.apis import set_random_seed
 from mmdet3d.models import build_model
-
+import threading
 import utils
 from models.utils import VERSION
 
 
 class model(object):
     def __init__(self, args):
+        self.mutex = threading.Lock()
         # parse configs
         cfgs = Config.fromfile(args.config)
 
@@ -101,4 +102,7 @@ class model(object):
         Returns:
             result (dict):
         """
-        return self.model(return_loss=False, rescale=True, **data)
+        self.mutex.acquire()
+        res = self.model(return_loss=False, rescale=True, **data)
+        self.mutex.release()
+        return res
