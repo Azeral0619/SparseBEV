@@ -3,9 +3,9 @@ import importlib
 import logging
 import pickle
 import tkinter as tk
-import zlib
 from concurrent.futures import ThreadPoolExecutor
 from queue import Queue
+import zlib
 
 import cv2
 import httpx
@@ -43,13 +43,20 @@ parser = argparse.ArgumentParser()
 val_dataset = None
 val_loader = None
 nusc = None
-pool_render = ThreadPoolExecutor(4)
+pool_render = ThreadPoolExecutor(2)
 pool_request = ThreadPoolExecutor(1)
 args = None
 queue = Queue()
 resp_queue = Queue()
 sio = socketio.Client(logger=True)
 client = httpx.Client()
+"""
+Sending:
+    {
+        imgs(List): List of images(base64)(num = 6)
+        img
+    }
+"""
 
 
 def update_image(image):
@@ -119,7 +126,9 @@ def handle_request(url, index, data):
     global client
     logging.info(f"Sending {index}th data")
     response = client.post(
-        url, content=data, headers={"Content-Type": "application/octet-stream"}
+        url,
+        content=data,
+        headers={"Content-Type": "application/octet-stream"},
     )
     result = pickle.loads(response.content)
     queue.put(index)
@@ -130,9 +139,8 @@ def generate_stream_data():
     global val_loader, args
 
     for i, data in enumerate(val_loader):
-        pool_render.submit(
-            handle_request, args.url, i, zlib.compress(pickle.dumps(data))
-        )
+        data = zlib.compress(pickle.dumps((i, data)))
+        pool_render.submit(handle_request, args.url, i, data)
 
 
 def render_response(result):
@@ -151,7 +159,6 @@ def render_response(result):
 @sio.on("connect")
 def connect():
     logging.info("Connected to server")
-    # generate_data_ws()
 
 
 @sio.on("disconnect")
@@ -198,13 +205,14 @@ def load_data():
     logging.info("Data loaded")
 
 
-# @sio.on("data")
+@sio.on("data")
 def generate_data_ws():
     global val_loader, queue, sio
-
     for i, data in enumerate(val_loader):
         queue.put(i)
         logging.info(f"Sending {i}th data")
+        if not sio.connected:
+            return
         sio.emit("detection", zlib.compress(pickle.dumps(data)))
 
     sio.emit("detection", "")
@@ -229,8 +237,8 @@ def main():
 
     if args.enable_ws == 1:
         url = args.url.replace("/detection", "")  # .replace("http", "ws")
-        sio.connect(url)
-        pool_request.submit(generate_data_ws)
+        sio.connect(url, transports=["websocket"])
+        # pool_request.submit(generate_data_ws)
     else:
         pool_request.submit(generate_stream_data)
 

@@ -112,4 +112,5 @@ class model(object):
         except Exception as e:
             self.mutex.release()
             raise e
+        self.mutex.release()
         return res

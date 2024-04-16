@@ -1,17 +1,32 @@
-import argparse
-import logging
-import pickle
-import time
-import zlib
+import eventlet
 
-import torch
-from flask import Flask, Response, request
-from flask_socketio import SocketIO, disconnect, emit
+eventlet.monkey_patch()
 
-from core import model
+import argparse  # noqa: E402
+import logging  # noqa: E402
+
+from os import system  # noqa: E402
+import pickle  # noqa: E402
+import time  # noqa: E402
+import zlib  # noqa: E402
+
+import torch  # noqa: E402
+from flask import Flask, Response, request  # noqa: E402
+from flask_socketio import SocketIO, disconnect, emit  # noqa: E402
+
+from core import model  # noqa: E402
+
+if system("service redis-server start") != 0:
+    raise Exception("Failed to start redis-server")
+
+eventlet.monkey_patch()
 
 app = Flask(__name__)
-socketio = SocketIO(logger=True, ping_timeout=600)
+socketio = SocketIO(
+    logger=True,
+    ping_timeout=600,
+    message_queue="redis://localhost:6379/0",
+)
 socketio.init_app(app, cors_allowed_origins="*")
 core = None
 memory = {}
@@ -27,7 +42,8 @@ def detection():
         results
     """
     data = request.data
-    data = pickle.loads(zlib.decompress(data))
+    index, data = zlib.decompress(pickle.loads(data))
+    logging.info(f"Received {index}th data")
     results = core(data)
     data = pickle.dumps(results)
     return Response(data, mimetype="application/octet-stream")
@@ -66,7 +82,7 @@ def detection_ws(data):
         logging.info("All data are received")
         disconnect()
         return
-    data = pickle.loads(zlib.decompress(data))
+    data = zlib.decompress(pickle.loads(data))
     memory[request.sid]["count"] += 1
     with torch.no_grad():
         torch.cuda.synchronize()
@@ -89,7 +105,7 @@ def handle_connect():
     memory[request.sid]["time"] = time.perf_counter()
     memory[request.sid]["count"] = 0
     logging.info("Connected to client")
-    # emit("data")
+    emit("data")
 
 
 @socketio.on("pong")
@@ -107,6 +123,11 @@ def handle_disconnect():
     del memory[request.sid]
     logging.info("Disconnected from client")
     disconnect()
+
+
+@socketio.on("test")
+def handle_test_ws(data):
+    emit("test", data)
 
 
 def main():
