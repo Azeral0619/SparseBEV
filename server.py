@@ -25,7 +25,7 @@ app = Flask(__name__)
 socketio = SocketIO(
     logger=True,
     ping_timeout=6000,
-    # message_queue="redis://localhost:6379/0",
+    message_queue="redis://:Jyh20619@localhost:6379/0",
     max_http_buffer_size=1024 * 1024 * 10,
 )
 socketio.init_app(app, cors_allowed_origins="*")
