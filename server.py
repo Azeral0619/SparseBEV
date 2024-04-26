@@ -61,8 +61,8 @@ def detection():
         cond.notify_all()
     if data is None:
         logging.info(
-            f"Done sample [{global_index} / ?], "
-            f"fps: {0 if global_index == 0 else (time.perf_counter() - memory['time']) / global_index:.1f} sample / s"
+            f"Done sample [{global_index} / {global_index}], "
+            f"fps: {0 if global_index == 0 else global_index / (time.perf_counter() - memory['time']) :.1f} sample / s"
         )
         return Response(b"", mimetype="application/octet-stream")
     data = pickle.dumps(results)

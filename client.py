@@ -137,12 +137,13 @@ def handle_request(url, index, data):
 
 def generate_stream_data():
     global val_loader, args, client
-
+    index = 0
     for i, data in enumerate(val_loader):
+        index = i
         data = zlib.compress(pickle.dumps((i, data)))
         pool_render.submit(handle_request, args.url, i, data)
-
-    data = zlib.compress(pickle.dumps((-1, None)))
+    index += 1
+    data = zlib.compress(pickle.dumps((index, None)))
     _ = client.post(
         args.url,
         content=data,
