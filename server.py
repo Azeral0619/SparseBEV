@@ -16,7 +16,7 @@ from flask_socketio import SocketIO, disconnect, emit  # noqa: E402
 
 from core import model  # noqa: E402
 
-if system("service redis-server start") != 0:
+if system("sudo service redis-server start") != 0:
     raise Exception("Failed to start redis-server")
 
 eventlet.monkey_patch()
@@ -24,8 +24,9 @@ eventlet.monkey_patch()
 app = Flask(__name__)
 socketio = SocketIO(
     logger=True,
-    ping_timeout=600,
-    message_queue="redis://localhost:6379/0",
+    ping_timeout=6000,
+    # message_queue="redis://localhost:6379/0",
+    max_http_buffer_size=1024 * 1024 * 10,
 )
 socketio.init_app(app, cors_allowed_origins="*")
 core = None
@@ -42,7 +43,7 @@ def detection():
         results
     """
     data = request.data
-    index, data = zlib.decompress(pickle.loads(data))
+    index, data = pickle.loads(zlib.decompress(data))
     logging.info(f"Received {index}th data")
     results = core(data)
     data = pickle.dumps(results)
@@ -82,7 +83,7 @@ def detection_ws(data):
         logging.info("All data are received")
         disconnect()
         return
-    data = zlib.decompress(pickle.loads(data))
+    data = pickle.loads(zlib.decompress(data))
     memory[request.sid]["count"] += 1
     with torch.no_grad():
         torch.cuda.synchronize()
