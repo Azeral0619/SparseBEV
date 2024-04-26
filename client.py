@@ -43,7 +43,7 @@ parser = argparse.ArgumentParser()
 val_dataset = None
 val_loader = None
 nusc = None
-pool_render = ThreadPoolExecutor(2)
+pool_render = ThreadPoolExecutor(1)
 pool_request = ThreadPoolExecutor(1)
 args = None
 queue = Queue()
@@ -136,11 +136,18 @@ def handle_request(url, index, data):
 
 
 def generate_stream_data():
-    global val_loader, args
+    global val_loader, args, client
 
     for i, data in enumerate(val_loader):
         data = zlib.compress(pickle.dumps((i, data)))
         pool_render.submit(handle_request, args.url, i, data)
+
+    data = zlib.compress(pickle.dumps((-1, None)))
+    _ = client.post(
+        args.url,
+        content=data,
+        headers={"Content-Type": "application/octet-stream"},
+    )
 
 
 def render_response(result):
