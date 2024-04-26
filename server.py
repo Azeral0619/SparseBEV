@@ -52,18 +52,19 @@ def detection():
     if index == 0:
         memory["time"] = time.perf_counter()
         global_index = 0
-    if index == -1:
+    with cond:
+        while index != global_index:
+            cond.wait()
+        if data is not None:
+            results = core(data)
+            global_index += 1
+        cond.notify_all()
+    if data is None:
         logging.info(
             f"Done sample [{global_index} / ?], "
             f"fps: {0 if global_index == 0 else (time.perf_counter() - memory['time']) / global_index:.1f} sample / s"
         )
         return Response(b"", mimetype="application/octet-stream")
-    with cond:
-        while index != global_index:
-            cond.wait()
-        results = core(data)
-        global_index += 1
-        cond.notify_all()
     data = pickle.dumps(results)
     return Response(data, mimetype="application/octet-stream")
 
