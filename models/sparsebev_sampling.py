@@ -26,7 +26,14 @@ def make_sample_points(query_bbox, offset, pc_range):
 
 
 def sampling_4d(
-    sample_points, mlvl_feats, scale_weights, lidar2img, image_h, image_w, eps=1e-5
+    sample_points,
+    mlvl_feats,
+    scale_weights,
+    lidar2img,
+    image_h,
+    image_w,
+    num_views,
+    eps=1e-5,
 ):
     """
     Args:
@@ -43,9 +50,8 @@ def sampling_4d(
         N: num of views (six for nuScenes)
         L: num of layers of feature pyramid (typically it is 4: C2, C3, C4, C5)
     """
-
     B, Q, T, G, P, _ = sample_points.shape  # [B, Q, T, G, P, 3]
-    N = 6
+    N = num_views  # TODO: change num of views
 
     sample_points = sample_points.reshape(B, Q, T, G * P, 3)
 

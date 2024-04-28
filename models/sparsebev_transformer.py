@@ -23,6 +23,7 @@ class SparseBEVTransformer(BaseModule):
         num_layers=6,
         num_levels=4,
         num_classes=10,
+        num_views=6,
         code_size=10,
         pc_range=[],
         init_cfg=None,
@@ -43,6 +44,7 @@ class SparseBEVTransformer(BaseModule):
             num_layers,
             num_levels,
             num_classes,
+            num_views,
             code_size,
             pc_range=pc_range,
         )
@@ -71,6 +73,7 @@ class SparseBEVTransformerDecoder(BaseModule):
         num_layers=6,
         num_levels=4,
         num_classes=10,
+        num_views=6,
         code_size=10,
         pc_range=[],
         init_cfg=None,
@@ -78,6 +81,7 @@ class SparseBEVTransformerDecoder(BaseModule):
         super(SparseBEVTransformerDecoder, self).__init__(init_cfg)
         self.num_layers = num_layers
         self.pc_range = pc_range
+        self.num_views = num_views
 
         # params are shared across all decoder layers
         self.decoder_layer = SparseBEVTransformerDecoderLayer(
@@ -86,6 +90,7 @@ class SparseBEVTransformerDecoder(BaseModule):
             num_points,
             num_levels,
             num_classes,
+            num_views,
             code_size,
             pc_range=pc_range,
         )
@@ -99,7 +104,7 @@ class SparseBEVTransformerDecoder(BaseModule):
 
         # calculate time difference according to timestamps
         timestamps = np.array([m["img_timestamp"] for m in img_metas], dtype=np.float64)
-        timestamps = np.reshape(timestamps, [query_bbox.shape[0], -1, 6])
+        timestamps = np.reshape(timestamps, [query_bbox.shape[0], -1, self.num_views])
         time_diff = timestamps[:, :1, :] - timestamps
         time_diff = np.mean(time_diff, axis=-1).astype(np.float32)  # [B, F]
         time_diff = torch.from_numpy(time_diff).to(query_bbox.device)  # [B, F]
@@ -114,7 +119,12 @@ class SparseBEVTransformerDecoder(BaseModule):
         # group image features in advance for sampling, see `sampling_4d` for more details
         for lvl, feat in enumerate(mlvl_feats):
             B, TN, GC, H, W = feat.shape  # [B, TN, GC, H, W]
-            N, T, G, C = 6, TN // 6, 4, GC // 4
+            N, T, G, C = (
+                self.num_views,
+                TN // self.num_views,
+                4,
+                GC // 4,
+            )  # TODO: change num of views
             feat = feat.reshape(B, T, N, G, C, H, W)
 
             if MSMV_CUDA:  # Our CUDA operator requires channel_last
@@ -156,6 +166,7 @@ class SparseBEVTransformerDecoderLayer(BaseModule):
         num_points=4,
         num_levels=4,
         num_classes=10,
+        num_views=6,
         code_size=10,
         num_cls_fcs=2,
         num_reg_fcs=2,
@@ -187,6 +198,7 @@ class SparseBEVTransformerDecoderLayer(BaseModule):
             num_groups=4,
             num_points=num_points,
             num_levels=num_levels,
+            num_views=num_views,
             pc_range=pc_range,
         )
         self.mixing = AdaptiveMixing(
@@ -385,6 +397,7 @@ class SparseBEVSampling(BaseModule):
         num_groups=4,
         num_points=8,
         num_levels=4,
+        num_views=6,
         pc_range=[],
         init_cfg=None,
     ):
@@ -395,6 +408,7 @@ class SparseBEVSampling(BaseModule):
         self.num_groups = num_groups
         self.num_levels = num_levels
         self.pc_range = pc_range
+        self.num_views = num_views
 
         self.sampling_offset = nn.Linear(embed_dims, num_groups * num_points * 3)
         self.scale_weights = nn.Linear(embed_dims, num_groups * num_points * num_levels)
@@ -462,6 +476,7 @@ class SparseBEVSampling(BaseModule):
             img_metas[0]["lidar2img"],
             image_h,
             image_w,
+            self.num_views,
         )  # [B, Q, G, FP, C]
 
         return sampled_feats

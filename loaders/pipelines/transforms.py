@@ -213,9 +213,10 @@ class PhotoMetricDistortionMultiViewImage:
 
 @PIPELINES.register_module()
 class RandomTransformImage(object):
-    def __init__(self, ida_aug_conf=None, training=True):
+    def __init__(self, ida_aug_conf=None, training=True, num_views=6):
         self.ida_aug_conf = ida_aug_conf
         self.training = training
+        self.num_views = num_views
 
     def __call__(self, results):
         resize, resize_dims, crop, flip, rotate = self.sample_augmentation()
@@ -236,7 +237,7 @@ class RandomTransformImage(object):
                 results["img"][i] = np.array(img).astype(np.uint8)
                 results["lidar2img"][i] = ida_mat @ results["lidar2img"][i]
 
-        elif len(results["img"]) == 6:
+        elif len(results["img"]) == self.num_views:  # TODO: change num of views
             for i in range(len(results["img"])):
                 img = Image.fromarray(np.uint8(results["img"][i]))
 

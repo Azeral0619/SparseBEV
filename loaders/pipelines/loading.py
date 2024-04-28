@@ -45,10 +45,11 @@ def compose_lidar2img(
 
 @PIPELINES.register_module()
 class LoadMultiViewImageFromMultiSweeps(object):
-    def __init__(self, sweeps_num=5, color_type="color", test_mode=False):
+    def __init__(self, sweeps_num=5, color_type="color", test_mode=False, num_views=6):
         self.sweeps_num = sweeps_num
         self.color_type = color_type
         self.test_mode = test_mode
+        self.num_views = num_views
 
         self.train_interval = [4, 8]
         self.test_interval = 6
@@ -125,6 +126,7 @@ class LoadMultiViewImageFromMultiSweeps(object):
         # only used when measuring FPS
         assert self.test_mode
         assert self.test_interval == 6
+        assert self.num_views <= 6 and self.num_views >= 1
 
         cam_types = [
             "CAM_FRONT",
@@ -134,6 +136,15 @@ class LoadMultiViewImageFromMultiSweeps(object):
             "CAM_BACK_LEFT",
             "CAM_BACK_RIGHT",
         ]
+
+        cam_types = cam_types[: self.num_views]
+        results["filename"] = results["filename"][: self.num_views]
+        results["lidar2img"] = results["lidar2img"][: self.num_views]
+        results["img_timestamp"] = results["img_timestamp"][: self.num_views]
+        results["img"] = results["img"][: self.num_views]
+        results["img_shape"] = results["ori_shape"] = results["pad_shape"] = results[
+            "img_shape"
+        ][:-1] + (self.num_views,)
 
         if len(results["sweeps"]["prev"]) == 0:
             for _ in range(self.sweeps_num):

@@ -30,6 +30,7 @@ class SparseBEV(MVXTwoStageDetector):
         train_cfg=None,
         test_cfg=None,
         pretrained=None,
+        num_views=6,
     ):
         super(SparseBEV, self).__init__(
             pts_voxel_layer,
@@ -52,6 +53,7 @@ class SparseBEV(MVXTwoStageDetector):
         self.color_aug = GpuPhotoMetricDistortion()
         self.grid_mask = GridMask(ratio=0.5, prob=0.7)
         self.use_grid_mask = True
+        self.num_views = num_views
 
         self.memory = {}
         self.queue = queue.Queue()
@@ -281,10 +283,12 @@ class SparseBEV(MVXTwoStageDetector):
         assert len(img_metas) == 1  # batch_size = 1
 
         B, N, C, H, W = img.shape
-        img = img.reshape(B, N // 6, 6, C, H, W)
+        img = img.reshape(
+            B, N // self.num_views, self.num_views, C, H, W
+        )  # TODO: change num of views
 
         img_filenames = img_metas[0]["filename"]
-        num_frames = len(img_filenames) // 6
+        num_frames = len(img_filenames) // self.num_views  # TODO: change num of views
         # assert num_frames == img.shape[1]
 
         img_shape = (H, W, C)
@@ -296,7 +300,9 @@ class SparseBEV(MVXTwoStageDetector):
 
         # extract feature frame by frame
         for i in range(num_frames):
-            img_indices = list(np.arange(i * 6, (i + 1) * 6))
+            img_indices = list(
+                np.arange(i * self.num_views, (i + 1) * self.num_views)
+            )  # TODO: change num of views
 
             img_metas_curr = [{}]
             for k in img_metas[0].keys():

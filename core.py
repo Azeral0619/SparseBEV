@@ -97,7 +97,7 @@ class model(object):
                     'img_timestamp': list[int]
                     'filename': list[str]
                     'lidar2img': list[np.ndarray(shape=(4, 4), dtype=float64)]
-            img (torch.Tensor | list[torch.Tensor]): [3, 6, 900, 1600]
+                img (torch.Tensor | list[torch.Tensor]): [3, 6, 900, 1600]
 
         Returns:
             result (dict):

@@ -31,6 +31,7 @@ num_query = 900
 num_frames = 8
 num_levels = 4
 num_points = 4
+num_views = 6
 
 img_backbone = dict(
     type="ResNet",
@@ -63,6 +64,7 @@ model = dict(
     stop_prev_grad=0,
     img_backbone=img_backbone,
     img_neck=img_neck,
+    num_views=num_views,
     pts_bbox_head=dict(
         type="SparseBEVHead",
         num_classes=10,
@@ -81,6 +83,7 @@ model = dict(
             num_layers=num_layers,
             num_levels=num_levels,
             num_classes=10,
+            num_views=num_views,
             code_size=10,
             pc_range=point_cloud_range,
         ),
@@ -133,7 +136,11 @@ ida_aug_conf = {
 
 train_pipeline = [
     dict(type="LoadMultiViewImageFromFiles", to_float32=False, color_type="color"),
-    dict(type="LoadMultiViewImageFromMultiSweeps", sweeps_num=num_frames - 1),
+    dict(
+        type="LoadMultiViewImageFromMultiSweeps",
+        sweeps_num=num_frames - 1,
+        num_views=num_views,
+    ),
     dict(
         type="LoadAnnotations3D",
         with_bbox_3d=True,
@@ -142,7 +149,12 @@ train_pipeline = [
     ),
     dict(type="ObjectRangeFilter", point_cloud_range=point_cloud_range),
     dict(type="ObjectNameFilter", classes=class_names),
-    dict(type="RandomTransformImage", ida_aug_conf=ida_aug_conf, training=True),
+    dict(
+        type="RandomTransformImage",
+        ida_aug_conf=ida_aug_conf,
+        training=True,
+        num_views=num_views,
+    ),
     dict(
         type="GlobalRotScaleTransImage",
         rot_range=[-0.3925, 0.3925],
@@ -169,8 +181,14 @@ test_pipeline = [
         type="LoadMultiViewImageFromMultiSweeps",
         sweeps_num=num_frames - 1,
         test_mode=True,
+        num_views=num_views,
     ),
-    dict(type="RandomTransformImage", ida_aug_conf=ida_aug_conf, training=False),
+    dict(
+        type="RandomTransformImage",
+        ida_aug_conf=ida_aug_conf,
+        training=False,
+        num_views=num_views,
+    ),
     dict(
         type="MultiScaleFlipAug3D",
         img_scale=(1600, 900),
