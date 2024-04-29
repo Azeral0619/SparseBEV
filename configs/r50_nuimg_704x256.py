@@ -176,7 +176,12 @@ train_pipeline = [
 ]
 
 test_pipeline = [
-    dict(type="LoadMultiViewImageFromFiles", to_float32=False, color_type="color"),
+    dict(
+        type="CustomLoadMultiViewImageFromFiles",
+        to_float32=False,
+        color_type="color",
+        num_views=num_views,
+    ),
     dict(
         type="LoadMultiViewImageFromMultiSweeps",
         sweeps_num=num_frames - 1,

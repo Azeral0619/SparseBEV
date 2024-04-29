@@ -18,6 +18,8 @@ class_names = [
 # cloud range accordingly
 point_cloud_range = [-51.2, -51.2, -5.0, 51.2, 51.2, 3.0]
 voxel_size = [0.2, 0.2, 8]
+num_views = 6
+num_frames = 8
 
 img_backbone = dict(
     type="ResNet",
@@ -50,7 +52,7 @@ ida_aug_conf = {
 
 train_pipeline = [
     dict(type="LoadMultiViewImageFromFiles", to_float32=False, color_type="color"),
-    dict(type="LoadMultiViewImageFromMultiSweeps", sweeps_num=7),
+    dict(type="LoadMultiViewImageFromMultiSweeps", sweeps_num=num_frames - 1),
     dict(
         type="LoadAnnotations3D",
         with_bbox_3d=True,
@@ -81,9 +83,24 @@ train_pipeline = [
 ]
 
 test_pipeline = [
-    dict(type="LoadMultiViewImageFromFiles", to_float32=False, color_type="color"),
-    dict(type="LoadMultiViewImageFromMultiSweeps", sweeps_num=7, test_mode=True),
-    dict(type="RandomTransformImage", ida_aug_conf=ida_aug_conf, training=False),
+    dict(
+        type="CustomLoadMultiViewImageFromFiles",
+        to_float32=False,
+        color_type="color",
+        num_views=num_views,
+    ),
+    dict(
+        type="LoadMultiViewImageFromMultiSweeps",
+        sweeps_num=num_frames - 1,
+        test_mode=True,
+        num_views=num_views,
+    ),
+    dict(
+        type="RandomTransformImage",
+        ida_aug_conf=ida_aug_conf,
+        training=False,
+        num_views=num_views,
+    ),
     dict(
         type="MultiScaleFlipAug3D",
         img_scale=(1600, 900),
