@@ -1,36 +1,30 @@
 import threading
+import zlib
+
 import eventlet
 
 eventlet.monkey_patch()
 
 import argparse  # noqa: E402
 import logging  # noqa: E402
-
-from os import system  # noqa: E402
 import pickle  # noqa: E402
 import time  # noqa: E402
-import zlib  # noqa: E402
 
 import torch  # noqa: E402
 from flask import Flask, Response, request  # noqa: E402
 from flask_socketio import SocketIO, disconnect, emit  # noqa: E402
 
-from core import model  # noqa: E402
-
-if system("sudo service redis-server start") != 0:
-    raise Exception("Failed to start redis-server")
-
-eventlet.monkey_patch()
+from core import PreProcess, model  # noqa: E402
 
 app = Flask(__name__)
 socketio = SocketIO(
     logger=True,
     ping_timeout=6000,
-    message_queue="redis://:Jyh20619@localhost:6379/0",
     max_http_buffer_size=1024 * 1024 * 10,
 )
 socketio.init_app(app, cors_allowed_origins="*")
 core = None
+pre_process = None
 memory = {}
 global_index = 0
 cond = threading.Condition()
@@ -45,13 +39,14 @@ def detection():
     Outputs:
         results
     """
-    global global_index
+    global global_index, pre_process, core, cond, memory
     data = request.data
     index, data = pickle.loads(zlib.decompress(data))
     logging.info(f"Received {index}th data")
     if index == 0:
         memory["time"] = time.perf_counter()
         global_index = 0
+    data = pre_process(data)
     with cond:
         while index != global_index:
             cond.wait()
@@ -97,12 +92,13 @@ def detection_ws(data):
     Outputs:
         results
     """
-    global memory
+    global memory, pre_process, core
     if len(data) == 0:
         logging.info("All data are received")
         disconnect()
         return
     data = pickle.loads(zlib.decompress(data))
+    data = pre_process(data)
     memory[request.sid]["count"] += 1
     with torch.no_grad():
         torch.cuda.synchronize()
@@ -151,7 +147,7 @@ def handle_test_ws(data):
 
 
 def main():
-    global core
+    global core, pre_process
     parser = argparse.ArgumentParser(description="Validate a detector")
     parser.add_argument("--config", required=True)
     parser.add_argument("--weights", required=True)
@@ -161,7 +157,8 @@ def main():
     parser.add_argument("--port", type=int, default=8080)
     args = parser.parse_args()
     core = model(args=args)
-    socketio.run(app, host="0.0.0.0", port=args.port, debug=True)
+    pre_process = PreProcess(args=args)
+    socketio.run(app, host="0.0.0.0", port=args.port)
     # server = pywsgi.WSGIServer(("0.0.0.0", args.port), app)
     # server.serve_forever()
 

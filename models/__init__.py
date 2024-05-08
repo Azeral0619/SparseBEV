@@ -3,5 +3,6 @@ from .bbox import __all__
 from .sparsebev import SparseBEV
 from .sparsebev_head import SparseBEVHead
 from .sparsebev_transformer import SparseBEVTransformer
+from .sparsebev_trt import SparseBEVTRT
 
-__all__ = ["SparseBEV", "SparseBEVHead", "SparseBEVTransformer"]
+__all__ = ["SparseBEV", "SparseBEVHead", "SparseBEVTransformer", "SparseBEVTRT"]

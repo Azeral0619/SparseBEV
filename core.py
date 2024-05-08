@@ -13,13 +13,23 @@ from mmdet3d.models import build_model
 import threading
 import utils
 from models.utils import VERSION
+from loaders.pipelines import (
+    CustomLoadMultiViewImageFromFiles,
+    LoadMultiViewImageFromMultiSweeps,
+    RandomTransformImage,
+)
+from mmdet3d.datasets.pipelines import (
+    MultiScaleFlipAug3D,
+    DefaultFormatBundle3D,
+    Collect3D,
+)
 
 
 class model(object):
     def __init__(self, args):
         self.mutex = threading.Lock()
         # parse configs
-        cfgs = Config.fromfile(args.config)
+        self.cfgs = Config.fromfile(args.config)
 
         # register custom module
         importlib.import_module("models")
@@ -45,7 +55,7 @@ class model(object):
         world_size = int(os.environ["WORLD_SIZE"])
 
         if local_rank == 0:
-            utils.init_logging(None, cfgs.debug)
+            utils.init_logging(None, self.cfgs.debug)
         else:
             logging.root.disabled = True
 
@@ -60,8 +70,8 @@ class model(object):
         set_random_seed(0, deterministic=True)
         cudnn.benchmark = True
 
-        logging.info("Creating model: %s" % cfgs.model.type)
-        self.model = build_model(cfgs.model)
+        logging.info("Creating model: %s" % self.cfgs.model.type)
+        self.model = build_model(self.cfgs.model)
         self.model.cuda()
         self.model.fp16_enabled = True
 
@@ -84,18 +94,14 @@ class model(object):
             VERSION.name = checkpoint["version"]
         self.model.eval()
 
+    @utils.timer_decorator
     def __call__(self, data):
         """Run the model on the input data and return the results.
 
         Args:
             data (dict):
                 image_metas (dict | list[dict]):
-                    'box_type_3d': 'LiDAR'
-                    'ori_shape': [(256, 704, 3), ...]
-                    'img_shape': [(256, 704, 3), ...]
-                    'pad_shape': [(256, 704, 3), ...]
                     'img_timestamp': list[int]
-                    'filename': list[str]
                     'lidar2img': list[np.ndarray(shape=(4, 4), dtype=float64)]
                 img (torch.Tensor | list[torch.Tensor]): [3, 6, 900, 1600]
 
@@ -114,3 +120,70 @@ class model(object):
             raise e
         self.mutex.release()
         return res
+
+
+class PreProcess(object):
+    def __init__(self, args):
+        self.cfgs = Config.fromfile(args.config)
+        num_frames = self.cfgs.num_frames
+        num_views = self.cfgs.num_views
+        ida_aug_conf = self.cfgs.ida_aug_conf
+        class_names = self.cfgs.class_names
+        self.customLoadMultiViewImageFromFiles = CustomLoadMultiViewImageFromFiles(
+            to_float32=False,
+            color_type="color",
+            num_views=num_views,
+            from_base64=True,
+        )
+        self.loadMultiViewImageFromMultiSweeps = LoadMultiViewImageFromMultiSweeps(
+            sweeps_num=num_frames - 1,
+            test_mode=True,
+            num_views=num_views,
+        )
+        self.randomTransformImage = RandomTransformImage(
+            ida_aug_conf=ida_aug_conf,
+            training=False,
+            num_views=num_views,
+        )
+        self.multiScaleFlipAug3D = MultiScaleFlipAug3D(
+            img_scale=(1600, 900),
+            pts_scale_ratio=1,
+            flip=False,
+            transforms=[
+                DefaultFormatBundle3D(class_names=class_names, with_label=False),
+                Collect3D(
+                    keys=["img"],
+                    meta_keys=(
+                        "lidar2img",
+                        "img_timestamp",
+                    ),
+                ),
+            ],
+        )
+
+    @utils.timer_decorator
+    def __call__(self, data):
+        """Preprocess the input data.
+
+        Args:
+            data (dict):
+                - img (list[str]): Multi-view image(base64) arrays.
+                - img_timestamp (list[float]): Timestamps of images.
+                - lidar2img (list[np.ndarray]): Lidar to image transformation matrices.
+
+        Returns:
+            _type_: _description_
+        """
+        if data is None:
+            return data
+
+        # 假设 data 是你想打印类型的数据
+        data = self.customLoadMultiViewImageFromFiles(data)
+        data = self.loadMultiViewImageFromMultiSweeps(data)
+        data = self.randomTransformImage(data)
+        data = self.multiScaleFlipAug3D(data)
+        data["img"][0]._data = [
+            data["img"][0]._data.reshape([1] + list(data["img"][0]._data.shape))
+        ]
+        data["img_metas"][0]._data = [[data["img_metas"][0]._data]]
+        return data

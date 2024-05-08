@@ -1,6 +1,7 @@
 import os
 import sys
 import glob
+import time
 import torch
 import shutil
 import logging
@@ -215,3 +216,27 @@ class MyTensorboardLoggerHook(LoggerHook):
     @master_only
     def after_run(self, runner):
         self.writer.close()
+
+
+def timer_decorator(method):
+    def wrapper(self, *args, **kwargs):
+        start_time = time.time()
+        result = method(self, *args, **kwargs)
+        end_time = time.time()
+        print(
+            f"Function {self.__class__.__name__}.{method.__name__} run time: {end_time - start_time} seconds"
+        )
+        return result
+
+    return wrapper
+
+
+def timer_decorator_func(func):
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        print(f"Function {func.__name__} run time: {end_time - start_time} seconds")
+        return result
+
+    return wrapper

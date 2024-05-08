@@ -19,6 +19,8 @@ class_names = [
     "traffic_cone",
 ]
 
+box_type_3d = "LiDAR"
+
 # If point cloud range is changed, the models should also change their point
 # cloud range accordingly
 point_cloud_range = [-51.2, -51.2, -5.0, 51.2, 51.2, 3.0]
@@ -207,11 +209,11 @@ test_pipeline = [
                 type="Collect3D",
                 keys=["img"],
                 meta_keys=(
-                    "filename",
-                    "box_type_3d",
-                    "ori_shape",
-                    "img_shape",
-                    "pad_shape",
+                    # "filename",
+                    # "box_type_3d",
+                    # "ori_shape",
+                    # "img_shape",
+                    # "pad_shape",
                     "lidar2img",
                     "img_timestamp",
                 ),
@@ -232,7 +234,7 @@ data = dict(
         modality=input_modality,
         test_mode=False,
         use_valid_flag=True,
-        box_type_3d="LiDAR",
+        box_type_3d=box_type_3d,
     ),
     val=dict(
         type=dataset_type,
@@ -243,7 +245,7 @@ data = dict(
         classes=class_names,
         modality=input_modality,
         test_mode=True,
-        box_type_3d="LiDAR",
+        box_type_3d=box_type_3d,
     ),
     test=dict(
         type=dataset_type,
@@ -253,7 +255,7 @@ data = dict(
         classes=class_names,
         modality=input_modality,
         test_mode=True,
-        box_type_3d="LiDAR",
+        box_type_3d=box_type_3d,
     ),
 )
 

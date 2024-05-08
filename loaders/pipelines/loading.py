@@ -1,9 +1,12 @@
+import base64
+import io
 import os
 import mmcv
 import numpy as np
 from mmdet.datasets.builder import PIPELINES
 from numpy.linalg import inv
 from mmcv.runner import get_dist_info
+from PIL import Image
 
 
 def compose_lidar2img(
@@ -56,10 +59,13 @@ class CustomLoadMultiViewImageFromFiles(object):
             Defaults to 'unchanged'.
     """
 
-    def __init__(self, to_float32=False, color_type="unchanged", num_views=6):
+    def __init__(
+        self, to_float32=False, color_type="unchanged", num_views=6, from_base64=False
+    ):
         self.to_float32 = to_float32
         self.color_type = color_type
         self.num_views = num_views
+        self.from_base64 = from_base64
 
     def __call__(self, results):
         """Call function to load multi-view image from files.
@@ -79,14 +85,24 @@ class CustomLoadMultiViewImageFromFiles(object):
                 - scale_factor (float): Scale factor.
                 - img_norm_cfg (dict): Normalization configuration of images.
         """
-        filename = results["img_filename"][: self.num_views]
-        # img is of shape (h, w, c, num_views)
-        img = np.stack(
-            [mmcv.imread(name, self.color_type) for name in filename], axis=-1
-        )
+        if not self.from_base64:
+            filename = results["img_filename"][: self.num_views]
+            # img is of shape (h, w, c, num_views)
+            img = np.stack(
+                [mmcv.imread(name, self.color_type) for name in filename], axis=-1
+            )
+            results["filename"] = filename
+        else:
+            img = results["img"]
+            img = np.stack(
+                [
+                    np.array(Image.open(io.BytesIO(base64.b64decode(imgs))))
+                    for imgs in img
+                ],
+                axis=-1,
+            )
         if self.to_float32:
             img = img.astype(np.float32)
-        results["filename"] = filename
         # unravel to list, see `DefaultFormatBundle` in formatting.py
         # which will transpose each image separately and then stack into array
         results["img"] = [img[..., i] for i in range(img.shape[-1])]
@@ -108,6 +124,60 @@ class CustomLoadMultiViewImageFromFiles(object):
         repr_str = self.__class__.__name__
         repr_str += f"(to_float32={self.to_float32}, "
         repr_str += f"color_type='{self.color_type}')"
+        return repr_str
+
+
+@PIPELINES.register_module()
+class LoadImageToBase64(object):
+    """Load multi channel images from a list of separate channel files.
+
+    Expects results['img_filename'] to be a list of filenames.
+    """
+
+    def __init__(self, num_views=6):
+        self.num_views = num_views
+        self.keeped_keys = {
+            "img",
+            "img_timestamp",
+            "lidar2img",
+            "sweeps",
+            "ego2global_translation",
+            "ego2global_rotation",
+            "lidar2ego_translation",
+            "lidar2ego_rotation",
+        }
+
+    def __call__(self, results):
+        """Call function to load multi-view image from files.
+
+        Args:
+            results (dict): Result dict containing multi-view image filenames.
+
+        Returns:
+            dict: The result dict containing the multi-view image data.
+                Added keys and values are described below.
+
+                - img (list[str]): Multi-view image(base64) arrays.
+                - img_timestamp (list[float]): Timestamps of images.
+                - lidar2img (list[np.ndarray]): Lidar to image transformation matrices.
+        """
+
+        def img_to_base64(img_path):
+            with open(img_path, "rb") as f:
+                img = f.read()
+            return base64.b64encode(img).decode("utf-8")
+
+        filename = results["img_filename"][: self.num_views]
+        # img is of shape (h, w, c, num_views)
+        img = [img_to_base64(name) for name in filename]
+        results["img"] = img
+
+        results = {k: v for k, v in results.items() if k in self.keeped_keys}
+        return results
+
+    def __repr__(self):
+        """str: Return a string that describes the module."""
+        repr_str = self.__class__.__name__
         return repr_str
 
 
@@ -216,7 +286,7 @@ class LoadMultiViewImageFromMultiSweeps(object):
             for _ in range(self.sweeps_num):
                 for j in range(len(cam_types)):
                     results["img_timestamp"].append(results["img_timestamp"][j])
-                    results["filename"].append(results["filename"][j])
+                    # results["filename"].append(results["filename"][j])
                     results["lidar2img"].append(np.copy(results["lidar2img"][j]))
         else:
             interval = self.test_interval
@@ -232,9 +302,9 @@ class LoadMultiViewImageFromMultiSweeps(object):
                 for sensor in cam_types:
                     # skip loading history frames
                     results["img_timestamp"].append(sweep[sensor]["timestamp"] / 1e6)
-                    results["filename"].append(
-                        os.path.relpath(sweep[sensor]["data_path"])
-                    )
+                    # results["filename"].append(
+                    #    os.path.relpath(sweep[sensor]["data_path"])
+                    # )
                     results["lidar2img"].append(
                         compose_lidar2img(
                             results["ego2global_translation"],

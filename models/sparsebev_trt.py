@@ -2,7 +2,6 @@ import queue
 import torch
 import numpy as np
 from mmcv.runner import force_fp32, auto_fp16
-from mmcv.runner import get_dist_info
 from mmcv.runner.fp16_utils import cast_tensor_type
 from mmdet.models import DETECTORS
 from mmdet3d.core import bbox3d2result
@@ -11,7 +10,7 @@ from .utils import GridMask, pad_multiple, GpuPhotoMetricDistortion
 
 
 @DETECTORS.register_module()
-class SparseBEV(MVXTwoStageDetector):
+class SparseBEVTRT(MVXTwoStageDetector):
     def __init__(
         self,
         data_aug=None,
@@ -32,7 +31,7 @@ class SparseBEV(MVXTwoStageDetector):
         pretrained=None,
         num_views=6,
     ):
-        super(SparseBEV, self).__init__(
+        super(SparseBEVTRT, self).__init__(
             pts_voxel_layer,
             pts_voxel_encoder,
             pts_middle_encoder,
@@ -60,9 +59,6 @@ class SparseBEV(MVXTwoStageDetector):
 
     @auto_fp16(apply_to=("img"), out_fp32=True)
     def extract_img_feat(self, img):
-        if self.use_grid_mask and self.training:
-            img = self.grid_mask(img)
-
         img_feats = self.img_backbone(img)
 
         if isinstance(img_feats, dict):
@@ -120,34 +116,7 @@ class SparseBEV(MVXTwoStageDetector):
         for img_meta in img_metas:
             img_meta.update(input_shape=input_shape)
 
-        if self.training and self.stop_prev_grad > 0:
-            H, W = input_shape
-            img = img.reshape(B, -1, 6, C, H, W)
-
-            img_grad = img[:, : self.stop_prev_grad]
-            img_nograd = img[:, self.stop_prev_grad :]
-
-            all_img_feats = [self.extract_img_feat(img_grad.reshape(-1, C, H, W))]
-
-            with torch.no_grad():
-                self.eval()
-                for k in range(img_nograd.shape[1]):
-                    all_img_feats.append(
-                        self.extract_img_feat(img_nograd[:, k].reshape(-1, C, H, W))
-                    )
-                self.train()
-
-            img_feats = []
-            for lvl in range(len(all_img_feats[0])):
-                C, H, W = all_img_feats[0][lvl].shape[1:]
-                img_feat = torch.cat(
-                    [feat[lvl].reshape(B, -1, 6, C, H, W) for feat in all_img_feats],
-                    dim=1,
-                )
-                img_feat = img_feat.reshape(-1, C, H, W)
-                img_feats.append(img_feat)
-        else:
-            img_feats = self.extract_img_feat(img)
+        img_feats = self.extract_img_feat(img)
 
         img_feats_reshaped = []
         for img_feat in img_feats:
@@ -155,28 +124,6 @@ class SparseBEV(MVXTwoStageDetector):
             img_feats_reshaped.append(img_feat.view(B, int(BN / B), C, H, W))
 
         return img_feats_reshaped
-
-    def forward_pts_train(
-        self, pts_feats, gt_bboxes_3d, gt_labels_3d, img_metas, gt_bboxes_ignore=None
-    ):
-        """Forward function for point cloud branch.
-        Args:
-            pts_feats (list[torch.Tensor]): Features of point cloud branch
-            gt_bboxes_3d (list[:obj:`BaseInstance3DBoxes`]): Ground truth
-                boxes for each sample.
-            gt_labels_3d (list[torch.Tensor]): Ground truth labels for
-                boxes of each sampole
-            img_metas (list[dict]): Meta information of samples.
-            gt_bboxes_ignore (list[torch.Tensor], optional): Ground truth
-                boxes to be ignored. Defaults to None.
-        Returns:
-            dict: Losses of each branch.
-        """
-        outs = self.pts_bbox_head(pts_feats, img_metas)
-        loss_inputs = [gt_bboxes_3d, gt_labels_3d, outs]
-        losses = self.pts_bbox_head.loss(*loss_inputs)
-
-        return losses
 
     @force_fp32(apply_to=("img", "points"))
     def forward(self, return_loss=True, **kwargs):
@@ -189,59 +136,7 @@ class SparseBEV(MVXTwoStageDetector):
         list[list[dict]]), with the outer list indicating test time
         augmentations.
         """
-        if return_loss:
-            return self.forward_train(**kwargs)
-        else:
-            return self.forward_test(**kwargs)
-
-    def forward_train(
-        self,
-        points=None,
-        img_metas=None,
-        gt_bboxes_3d=None,
-        gt_labels_3d=None,
-        gt_labels=None,
-        gt_bboxes=None,
-        img=None,
-        proposals=None,
-        gt_bboxes_ignore=None,
-        img_depth=None,
-        img_mask=None,
-    ):
-        """Forward training function.
-        Args:
-            points (list[torch.Tensor], optional): Points of each sample.
-                Defaults to None.
-            img_metas (list[dict], optional): Meta information of each sample.
-                Defaults to None.
-            gt_bboxes_3d (list[:obj:`BaseInstance3DBoxes`], optional):
-                Ground truth 3D boxes. Defaults to None.
-            gt_labels_3d (list[torch.Tensor], optional): Ground truth labels
-                of 3D boxes. Defaults to None.
-            gt_labels (list[torch.Tensor], optional): Ground truth labels
-                of 2D boxes in images. Defaults to None.
-            gt_bboxes (list[torch.Tensor], optional): Ground truth 2D boxes in
-                images. Defaults to None.
-            img (torch.Tensor optional): Images of each sample with shape
-                (N, C, H, W). Defaults to None.
-            proposals ([list[torch.Tensor], optional): Predicted proposals
-                used for training Fast RCNN. Defaults to None.
-            gt_bboxes_ignore (list[torch.Tensor], optional): Ground truth
-                2D boxes in images to be ignored. Defaults to None.
-        Returns:
-            dict: Losses of different branches.
-        """
-        img_feats = self.extract_feat(img, img_metas)
-
-        for i in range(len(img_metas)):
-            img_metas[i]["gt_bboxes_3d"] = gt_bboxes_3d[i]
-            img_metas[i]["gt_labels_3d"] = gt_labels_3d[i]
-
-        losses = self.forward_pts_train(
-            img_feats, gt_bboxes_3d, gt_labels_3d, img_metas, gt_bboxes_ignore
-        )
-
-        return losses
+        return self.forward_test(**kwargs)
 
     def forward_test(self, img_metas, img=None, **kwargs):
         for var, name in [(img_metas, "img_metas")]:
@@ -262,21 +157,7 @@ class SparseBEV(MVXTwoStageDetector):
         return bbox_results
 
     def simple_test(self, img_metas, img=None, rescale=False):
-        world_size = get_dist_info()[1]
-        if world_size == 1:  # online
-            return self.simple_test_online(img_metas, img, rescale)
-        else:  # offline
-            return self.simple_test_offline(img_metas, img, rescale)
-
-    def simple_test_offline(self, img_metas, img=None, rescale=False):
-        img_feats = self.extract_feat(img=img, img_metas=img_metas)
-
-        bbox_list = [dict() for _ in range(len(img_metas))]
-        bbox_pts = self.simple_test_pts(img_feats, img_metas, rescale=rescale)
-        for result_dict, pts_bbox in zip(bbox_list, bbox_pts):
-            result_dict["pts_bbox"] = pts_bbox
-
-        return bbox_list
+        return self.simple_test_online(img_metas, img, rescale)
 
     def simple_test_online(self, img_metas, img=None, rescale=False):
         self.fp16_enabled = False

@@ -3,9 +3,9 @@ import importlib
 import logging
 import pickle
 import tkinter as tk
+import zlib
 from concurrent.futures import ThreadPoolExecutor
 from queue import Queue
-import zlib
 
 import cv2
 import httpx
@@ -13,12 +13,13 @@ import numpy as np
 import socketio
 from mmcv import Config
 from mmdet.apis import set_random_seed
-from mmdet3d.datasets import build_dataloader, build_dataset
+from mmdet3d.datasets import build_dataset
 from nuscenes.nuscenes import NuScenes
 from nuscenes.utils.geometry_utils import box_in_image
 from PIL import Image, ImageTk
 from pyquaternion import Quaternion
 
+from loaders.pipelines.loading import LoadImageToBase64
 from viz_bbox_predictions import convert_to_nusc_box
 
 classname_to_color = {  # RGB
@@ -44,8 +45,9 @@ val_dataset = None
 val_loader = None
 nusc = None
 pool_render = ThreadPoolExecutor(1)
-pool_request = ThreadPoolExecutor(3)
+pool_request = ThreadPoolExecutor(4)
 args = None
+num_views = None
 queue = Queue()
 resp_queue = Queue()
 sio = socketio.Client(logger=True)
@@ -136,9 +138,12 @@ def handle_request(url, index, data):
 
 
 def generate_stream_data():
-    global val_loader, args, client
+    global val_dataset, client
     index = 0
-    for i, data in enumerate(val_loader):
+    loadImageToBase64 = LoadImageToBase64(num_views=6)
+    for i in range(len(val_dataset)):
+        data = val_dataset.get_data_info(i)
+        data = loadImageToBase64(data)
         index = i
         data = zlib.compress(pickle.dumps((i, data)))
         pool_render.submit(handle_request, args.url, i, data)
@@ -182,9 +187,10 @@ def ping():
 
 
 def load_data():
-    global val_dataset, val_loader, nusc, sio
+    global val_dataset, val_loader, nusc, sio, num_views
     # parse configs
     cfgs = Config.fromfile(args.config)
+    num_views = cfgs.num_views
 
     # register custom module
     importlib.import_module("loaders")
@@ -192,15 +198,6 @@ def load_data():
     set_random_seed(0, deterministic=True)
 
     val_dataset = build_dataset(cfgs.data.val)
-    val_loader = build_dataloader(
-        val_dataset,
-        samples_per_gpu=1,
-        workers_per_gpu=cfgs.data.workers_per_gpu,
-        num_gpus=1,
-        dist=False,
-        shuffle=False,
-        seed=0,
-    )
 
     if "mini" in cfgs.data.val.ann_file:
         nusc = NuScenes(
@@ -215,8 +212,11 @@ def load_data():
 
 @sio.on("data")
 def generate_data_ws():
-    global val_loader, queue, sio
-    for i, data in enumerate(val_loader):
+    global val_dataset, queue, sio, num_views
+    loadImageToBase64 = LoadImageToBase64(num_views=num_views)
+    for i in range(len(val_dataset)):
+        data = val_dataset.get_data_info(i)
+        data = loadImageToBase64(data)
         queue.put(i)
         logging.info(f"Sending {i}th data")
         if not sio.connected:
@@ -239,7 +239,7 @@ def main():
     parser.add_argument("--url", type=str, default="http://127.0.0.1:8080/detection")
     parser.add_argument("--config", required=True)
     parser.add_argument("--score_threshold", default=0.3)
-    parser.add_argument("--enable_ws", type=int, default=1)
+    parser.add_argument("--enable_ws", type=int, default=0)
     args = parser.parse_args()
     load_data()
 
