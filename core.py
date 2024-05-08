@@ -112,7 +112,6 @@ class model(object):
         try:
             with torch.no_grad():
                 torch.cuda.synchronize()
-                logging.info("Processing data")
                 res = self.model(return_loss=False, rescale=True, **data)
                 torch.cuda.synchronize()
         except Exception as e:

@@ -1,0 +1,14 @@
+[2024-05-08 22:07:16,162][INFO] - Using GPU: NVIDIA GeForce RTX 3050 Laptop GPU
+[2024-05-08 22:07:16,167][INFO] - Setting random seed: 0
+[2024-05-08 22:07:16,167][INFO] - Creating model: SparseBEV
+[2024-05-08 22:07:16,697][INFO] - Loading checkpoint from checkpoints/r50_nuimg_704x256_400q_36ep.pth
+Traceback (most recent call last):
+  File "server.py", line 181, in <module>
+    main()
+  File "server.py", line 173, in main
+    socketio.run(app, host="0.0.0.0", port=args.port, threaded=True)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask_socketio/__init__.py", line 683, in run
+    run_server()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask_socketio/__init__.py", line 677, in run_server
+    eventlet.wsgi.server(eventlet_socket, app,
+TypeError: server() got an unexpected keyword argument 'threaded'

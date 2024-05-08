@@ -45,7 +45,7 @@ val_dataset = None
 val_loader = None
 nusc = None
 pool_render = ThreadPoolExecutor(1)
-pool_request = ThreadPoolExecutor(4)
+pool_request = ThreadPoolExecutor(8)
 args = None
 num_views = None
 queue = Queue()
@@ -145,10 +145,10 @@ def generate_stream_data():
         data = val_dataset.get_data_info(i)
         data = loadImageToBase64(data)
         index = i
-        data = zlib.compress(pickle.dumps((i, data)))
+        data = pickle.dumps((i, data))
         pool_render.submit(handle_request, args.url, i, data)
     index += 1
-    data = zlib.compress(pickle.dumps((index, None)))
+    data = pickle.dumps((index, None))
     _ = client.post(
         args.url,
         content=data,
@@ -221,7 +221,7 @@ def generate_data_ws():
         logging.info(f"Sending {i}th data")
         if not sio.connected:
             return
-        sio.emit("detection", zlib.compress(pickle.dumps(data)))
+        sio.emit("detection", pickle.dumps(data))
 
     sio.emit("detection", "")
 

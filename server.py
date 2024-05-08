@@ -1,7 +1,7 @@
 import threading
-import zlib
 
 import eventlet
+import eventlet.wsgi
 
 eventlet.monkey_patch()
 
@@ -9,6 +9,7 @@ import argparse  # noqa: E402
 import logging  # noqa: E402
 import pickle  # noqa: E402
 import time  # noqa: E402
+import utils
 
 import torch  # noqa: E402
 from flask import Flask, Response, request  # noqa: E402
@@ -16,13 +17,16 @@ from flask_socketio import SocketIO, disconnect, emit  # noqa: E402
 
 from core import PreProcess, model  # noqa: E402
 
+ENABLE_SOCKETIO = True
+
 app = Flask(__name__)
-socketio = SocketIO(
-    logger=True,
-    ping_timeout=6000,
-    max_http_buffer_size=1024 * 1024 * 10,
-)
-socketio.init_app(app, cors_allowed_origins="*")
+if ENABLE_SOCKETIO:
+    socketio = SocketIO(
+        logger=True,
+        ping_timeout=6000,
+        max_http_buffer_size=1024 * 1024 * 10,
+    )
+    socketio.init_app(app, cors_allowed_origins="*")
 core = None
 pre_process = None
 memory = {}
@@ -30,7 +34,15 @@ global_index = 0
 cond = threading.Condition()
 
 
+@app.before_request
+def log_each_request():
+    logging.info(
+        "[{}] - {} from {}".format(request.method, request.path, request.remote_addr)
+    )
+
+
 @app.route("/detection", methods=["POST"])
+@utils.timer_decorator_func
 def detection():
     """Run the model on the input data and return the results.
 
@@ -41,8 +53,8 @@ def detection():
     """
     global global_index, pre_process, core, cond, memory
     data = request.data
-    index, data = pickle.loads(zlib.decompress(data))
-    logging.info(f"Received {index}th data")
+    index, data = pickle.loads(data)
+    # logging.info(f"Received {index}th data")
     if index == 0:
         memory["time"] = time.perf_counter()
         global_index = 0
@@ -83,71 +95,70 @@ def info():
     return "Real-time 3D object detection server"
 
 
-@socketio.on("detection")
-def detection_ws(data):
-    """Run the model on the input data and return the results.
+if ENABLE_SOCKETIO:
 
-    Inputs:
-        data
-    Outputs:
-        results
-    """
-    global memory, pre_process, core
-    if len(data) == 0:
-        logging.info("All data are received")
-        disconnect()
-        return
-    data = pickle.loads(zlib.decompress(data))
-    data = pre_process(data)
-    memory[request.sid]["count"] += 1
-    with torch.no_grad():
-        torch.cuda.synchronize()
-        logging.info(f"Processing {memory[request.sid]['count']}th data")
-        results = core(data)
-        torch.cuda.synchronize()
-    if memory[request.sid]["count"] != 0 and memory[request.sid]["count"] % 20 == 0:
+    @socketio.on("detection")
+    def detection_ws(data):
+        """Run the model on the input data and return the results.
+
+        Inputs:
+            data
+        Outputs:
+            results
+        """
+        global memory, pre_process, core
+        if len(data) == 0:
+            logging.info("All data are received")
+            disconnect()
+            return
+        data = pickle.loads(data)
+        data = pre_process(data)
+        memory[request.sid]["count"] += 1
+        with torch.no_grad():
+            torch.cuda.synchronize()
+            logging.info(f"Processing {memory[request.sid]['count']}th data")
+            results = core(data)
+            torch.cuda.synchronize()
+        if memory[request.sid]["count"] != 0 and memory[request.sid]["count"] % 20 == 0:
+            logging.info(
+                f"Done sample [{memory[request.sid]['count']} / ?], "
+                f"fps: {0 if memory[request.sid]['count'] == 0 else (time.perf_counter() - memory[request.sid]['time']) / memory[request.sid]['count']:.1f} sample / s"
+            )
+        data = pickle.dumps(results)
+        emit("result", data)
+
+    @socketio.on("connect")
+    def handle_connect():
+        global memory
+        memory[request.sid] = {}
+        memory[request.sid]["time"] = time.perf_counter()
+        memory[request.sid]["count"] = 0
+        logging.info("Connected to client")
+        emit("data")
+
+    @socketio.on("pong")
+    def pong():
+        emit("ping")
+
+    @socketio.on("disconnect")
+    def handle_disconnect():
+        global memory
         logging.info(
-            f"Done sample [{memory[request.sid]['count']} / ?], "
+            f"Done sample [{memory[request.sid]['count']} / {memory[request.sid]['count']}], "
             f"fps: {0 if memory[request.sid]['count'] == 0 else (time.perf_counter() - memory[request.sid]['time']) / memory[request.sid]['count']:.1f} sample / s"
         )
-    data = pickle.dumps(results)
-    emit("result", data)
+        del memory[request.sid]
+        logging.info("Disconnected from client")
+        disconnect()
 
-
-@socketio.on("connect")
-def handle_connect():
-    global memory
-    memory[request.sid] = {}
-    memory[request.sid]["time"] = time.perf_counter()
-    memory[request.sid]["count"] = 0
-    logging.info("Connected to client")
-    emit("data")
-
-
-@socketio.on("pong")
-def pong():
-    emit("ping")
-
-
-@socketio.on("disconnect")
-def handle_disconnect():
-    global memory
-    logging.info(
-        f"Done sample [{memory[request.sid]['count']} / {memory[request.sid]['count']}], "
-        f"fps: {0 if memory[request.sid]['count'] == 0 else (time.perf_counter() - memory[request.sid]['time']) / memory[request.sid]['count']:.1f} sample / s"
-    )
-    del memory[request.sid]
-    logging.info("Disconnected from client")
-    disconnect()
-
-
-@socketio.on("test")
-def handle_test_ws(data):
-    emit("test", data)
+    @socketio.on("test")
+    def handle_test_ws(data):
+        emit("test", data)
 
 
 def main():
     global core, pre_process
+    logging.basicConfig(level=logging.INFO)
     parser = argparse.ArgumentParser(description="Validate a detector")
     parser.add_argument("--config", required=True)
     parser.add_argument("--weights", required=True)
@@ -158,9 +169,12 @@ def main():
     args = parser.parse_args()
     core = model(args=args)
     pre_process = PreProcess(args=args)
-    socketio.run(app, host="0.0.0.0", port=args.port)
-    # server = pywsgi.WSGIServer(("0.0.0.0", args.port), app)
-    # server.serve_forever()
+    if ENABLE_SOCKETIO:
+        socketio.run(app, host="0.0.0.0", port=args.port, threaded=True)
+    else:
+        eventlet.wsgi.server(
+            eventlet.listen(("0.0.0.0", args.port)), app
+        ).serve_forever()
 
 
 if __name__ == "__main__":
