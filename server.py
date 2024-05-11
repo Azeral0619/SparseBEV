@@ -9,7 +9,7 @@ import argparse  # noqa: E402
 import logging  # noqa: E402
 import pickle  # noqa: E402
 import time  # noqa: E402
-import utils
+import utils  # noqa: E402
 
 import torch  # noqa: E402
 from flask import Flask, Response, request  # noqa: E402

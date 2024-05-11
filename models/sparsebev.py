@@ -1,13 +1,16 @@
 import queue
-import torch
+
 import numpy as np
-from mmcv.runner import force_fp32, auto_fp16
-from mmcv.runner import get_dist_info
+import torch
+from mmcv.cnn.bricks.registry import PLUGIN_LAYERS
+from mmcv.runner import auto_fp16, force_fp32, get_dist_info
 from mmcv.runner.fp16_utils import cast_tensor_type
+from mmcv.utils import build_from_cfg
 from mmdet.models import DETECTORS
 from mmdet3d.core import bbox3d2result
 from mmdet3d.models.detectors.mvx_two_stage import MVXTwoStageDetector
-from .utils import GridMask, pad_multiple, GpuPhotoMetricDistortion
+
+from .utils import GpuPhotoMetricDistortion, GridMask, pad_multiple
 
 
 @DETECTORS.register_module()
@@ -30,6 +33,7 @@ class SparseBEV(MVXTwoStageDetector):
         train_cfg=None,
         test_cfg=None,
         pretrained=None,
+        depth_branch=None,
         num_views=6,
     ):
         super(SparseBEV, self).__init__(
@@ -48,6 +52,10 @@ class SparseBEV(MVXTwoStageDetector):
             test_cfg,
             pretrained,
         )
+        if depth_branch is not None:
+            self.depth_branch = build_from_cfg(depth_branch, PLUGIN_LAYERS)
+        else:
+            self.depth_branch = None
         self.data_aug = data_aug
         self.stop_prev_grad = stop_prev_grad
         self.color_aug = GpuPhotoMetricDistortion()
@@ -73,7 +81,7 @@ class SparseBEV(MVXTwoStageDetector):
 
         return img_feats
 
-    def extract_feat(self, img, img_metas):
+    def extract_feat(self, img, img_metas, return_depth=False, data=None):
         if isinstance(img, list):
             img = torch.stack(img, dim=0)
 
@@ -153,11 +161,24 @@ class SparseBEV(MVXTwoStageDetector):
         for img_feat in img_feats:
             BN, C, H, W = img_feat.size()
             img_feats_reshaped.append(img_feat.view(B, int(BN / B), C, H, W))
-
+        if return_depth and self.depth_branch is not None:
+            curr_feats = [feat[:, :6, :, :, :] for feat in img_feats_reshaped]
+            depths = self.depth_branch(curr_feats, data.get("focal"))
+        else:
+            depths = None
+        if return_depth:
+            return img_feats_reshaped, depths
         return img_feats_reshaped
 
     def forward_pts_train(
-        self, pts_feats, gt_bboxes_3d, gt_labels_3d, img_metas, gt_bboxes_ignore=None
+        self,
+        pts_feats,
+        gt_bboxes_3d,
+        gt_labels_3d,
+        img_metas,
+        data,
+        gt_bboxes_ignore=None,
+        feature_maps=None,
     ):
         """Forward function for point cloud branch.
         Args:
@@ -173,8 +194,10 @@ class SparseBEV(MVXTwoStageDetector):
             dict: Losses of each branch.
         """
         outs = self.pts_bbox_head(pts_feats, img_metas)
-        loss_inputs = [gt_bboxes_3d, gt_labels_3d, outs]
-        losses = self.pts_bbox_head.loss(*loss_inputs)
+        loss_inputs = [gt_bboxes_3d, gt_labels_3d, outs, data]
+        losses = self.pts_bbox_head.loss(
+            *loss_inputs, gt_bboxes_ignore=gt_bboxes_ignore, feature_maps=feature_maps
+        )
 
         return losses
 
@@ -207,6 +230,7 @@ class SparseBEV(MVXTwoStageDetector):
         gt_bboxes_ignore=None,
         img_depth=None,
         img_mask=None,
+        **data,
     ):
         """Forward training function.
         Args:
@@ -231,15 +255,28 @@ class SparseBEV(MVXTwoStageDetector):
         Returns:
             dict: Losses of different branches.
         """
-        img_feats = self.extract_feat(img, img_metas)
+        img_feats, depths = self.extract_feat(img, img_metas, data, True)
 
         for i in range(len(img_metas)):
             img_metas[i]["gt_bboxes_3d"] = gt_bboxes_3d[i]
             img_metas[i]["gt_labels_3d"] = gt_labels_3d[i]
 
+        curr_feats = [feat[:, :6, :, :, :] for feat in img_feats]
+
         losses = self.forward_pts_train(
-            img_feats, gt_bboxes_3d, gt_labels_3d, img_metas, gt_bboxes_ignore
+            img_feats,
+            gt_bboxes_3d,
+            gt_labels_3d,
+            img_metas,
+            data,
+            gt_bboxes_ignore,
+            feature_maps=curr_feats,
         )
+
+        if depths is not None and "gt_depth" in img_metas:
+            losses["loss_dense_depth"] = self.depth_branch.loss(
+                depths, img_metas["gt_depth"]
+            )
 
         return losses
 

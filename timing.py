@@ -50,7 +50,7 @@ def main():
     cudnn.benchmark = True
 
     logging.info("Loading validation set from %s" % cfgs.data.val.data_root)
-    val_dataset = build_dataset(cfgs.data.val)
+    val_dataset = build_dataset(cfgs.data.train)
     val_loader = build_dataloader(
         val_dataset,
         samples_per_gpu=1,
@@ -84,7 +84,7 @@ def main():
             torch.cuda.synchronize()
             start_time = time.perf_counter()
 
-            model(return_loss=False, rescale=True, **data)
+            model(return_loss=True, rescale=True, **data)
 
             torch.cuda.synchronize()
             elapsed = time.perf_counter() - start_time

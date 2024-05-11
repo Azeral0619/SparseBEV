@@ -1,13 +1,17 @@
 import math
+
 import torch
 import torch.nn as nn
+from mmcv.cnn.bricks.registry import PLUGIN_LAYERS
 from mmcv.runner import force_fp32
+from mmcv.utils import build_from_cfg
 from mmdet.core import multi_apply, reduce_mean
 from mmdet.models import HEADS
 from mmdet.models.dense_heads import DETRHead
 from mmdet3d.core.bbox.coders import build_bbox_coder
 from mmdet3d.core.bbox.structures.lidar_box3d import LiDARInstance3DBoxes
-from .bbox.utils import normalize_bbox, encode_bbox
+
+from .bbox.utils import encode_bbox, normalize_bbox
 from .utils import VERSION
 
 
@@ -25,8 +29,14 @@ class SparseBEVHead(DETRHead):
         code_weights=[1.0] * 10,
         train_cfg=dict(),
         test_cfg=dict(max_per_img=100),
+        dense_depth_module: dict = None,
         **kwargs,
     ):
+        def build(cfg, registry):
+            if cfg is None:
+                return None
+            return build_from_cfg(cfg, registry)
+
         self.code_size = code_size
         self.code_weights = code_weights
         self.num_classes = num_classes
@@ -35,6 +45,7 @@ class SparseBEVHead(DETRHead):
         self.test_cfg = test_cfg
         self.fp16_enabled = False
         self.embed_dims = in_channels
+        self.dense_depth_module = build(dense_depth_module, PLUGIN_LAYERS)
 
         super(SparseBEVHead, self).__init__(
             num_classes, in_channels, train_cfg=train_cfg, test_cfg=test_cfg, **kwargs
@@ -524,7 +535,15 @@ class SparseBEVHead(DETRHead):
         return loss_cls, loss_bbox
 
     @force_fp32(apply_to=("preds_dicts"))
-    def loss(self, gt_bboxes_list, gt_labels_list, preds_dicts, gt_bboxes_ignore=None):
+    def loss(
+        self,
+        gt_bboxes_list,
+        gt_labels_list,
+        preds_dicts,
+        data,
+        gt_bboxes_ignore=None,
+        feature_maps=None,
+    ):
         assert gt_bboxes_ignore is None, (
             f"{self.__class__.__name__} only supports "
             f"for gt_bboxes_ignore setting to None."
@@ -587,6 +606,13 @@ class SparseBEVHead(DETRHead):
             loss_dict[f"d{num_dec_layer}.loss_cls"] = loss_cls_i
             loss_dict[f"d{num_dec_layer}.loss_bbox"] = loss_bbox_i
             num_dec_layer += 1
+
+        if self.dense_depth_module is not None:
+            loss_dict["loss_dense_depth"] = self.dense_depth_module(
+                feature_maps,
+                focal=data.get("focal"),
+                gt_depths=data["gt_depth"],
+            )
         return loss_dict
 
     @force_fp32(apply_to=("preds_dicts"))

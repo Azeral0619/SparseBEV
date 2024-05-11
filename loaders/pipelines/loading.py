@@ -594,3 +594,52 @@ class LoadMultiViewImageFromMultiSweepsFutureInterleave(object):
                 results["lidar2img"].append(results_next["lidar2img"][i * 6 + j])
 
         return results
+
+
+@PIPELINES.register_module()
+class MultiScaleDepthMapGenerator(object):
+    def __init__(self, downsample=1, max_depth=60, num_views=6):
+        if not isinstance(downsample, (list, tuple)):
+            downsample = [downsample]
+        self.downsample = downsample
+        self.max_depth = max_depth
+        self.num_views = num_views
+
+    def __call__(self, results):
+        points = results["points"].tensor[..., :3, None].cpu().numpy()
+
+        gt_depth = []
+        for i, lidar2img in enumerate(results["lidar2img"][: self.num_views]):
+            H, W = results["img_shape"][i][:2]
+
+            pts_2d = np.squeeze(lidar2img[:3, :3] @ points, axis=-1) + lidar2img[:3, 3]
+            pts_2d[:, :2] /= pts_2d[:, 2:3]
+            U = np.round(pts_2d[:, 0]).astype(np.int32)
+            V = np.round(pts_2d[:, 1]).astype(np.int32)
+            depths = pts_2d[:, 2]
+            mask = np.logical_and.reduce(
+                [
+                    V >= 0,
+                    V < H,
+                    U >= 0,
+                    U < W,
+                    depths >= 0.1,
+                    depths <= self.max_depth,
+                ]
+            )
+            V, U, depths = V[mask], U[mask], depths[mask]
+            sort_idx = np.argsort(depths)[::-1]
+            V, U, depths = V[sort_idx], U[sort_idx], depths[sort_idx]
+
+            for j, downsample in enumerate(self.downsample):
+                if len(gt_depth) < j + 1:
+                    gt_depth.append([])
+                h, w = (int(H / downsample), int(W / downsample))
+                u = np.floor(U / downsample).astype(np.int32)
+                v = np.floor(V / downsample).astype(np.int32)
+                depth_map = np.ones([h, w], dtype=np.float32) * -1
+                depth_map[v, u] = depths
+                gt_depth[j].append(depth_map)
+
+        results["gt_depth"] = [np.stack(x) for x in gt_depth]
+        return results

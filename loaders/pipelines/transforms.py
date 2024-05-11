@@ -405,3 +405,17 @@ class GlobalRotScaleTransImage(object):
             results["lidar2img"][view] = (
                 torch.tensor(results["lidar2img"][view]).float() @ scale_mat_inv
             ).numpy()
+
+
+@PIPELINES.register_module()
+class NuScenesAdaptor(object):
+    def __init__(self) -> None:
+        pass
+
+    def __call__(self, input_dict):
+        if "cam_intrinsic" in input_dict:
+            input_dict["cam_intrinsic"] = np.float32(
+                np.stack(input_dict["cam_intrinsic"])
+            )
+            input_dict["focal"] = input_dict["cam_intrinsic"][..., 0, 0]
+        return input_dict

@@ -258,12 +258,30 @@ class SparseBEVTransformerDecoderLayer(BaseModule):
 
         # 解码器第一层：尺度自适应的多头自注意力
         query_feat = self.norm1(self.self_attn(query_bbox, query_feat, attn_mask))
+        # TODO: Pre-LN or Post-LN
+        # Post-LN
+        # query_feat = self.norm1(query_feat + self.self_attn(query_bbox, query_feat, attn_mask))
+        # Pre-LN
+        # query_feat = self.self_attn(query_bbox, self.norm1(query_feat), attn_mask) + query_feat
+
         # 解码器第二层：从多尺度特征金字塔中采样
         sampled_feat = self.sampling(query_bbox, query_feat, mlvl_feats, img_metas)
+
         # 解码器第三层：融合采样特征和查询特征
         query_feat = self.norm2(self.mixing(sampled_feat, query_feat))
+        # TODO: Pre-LN or Post-LN
+        # Post-LN
+        # query_feat = self.norm2(query_feat + self.mixing(sampled_feat, query_feat))
+        # Pre-LN
+        # query_feat = self.mixing(sampled_feat, self.norm2(query_feat)) + query_feat
+
         # 解码器第四层：FFN网络
         query_feat = self.norm3(self.ffn(query_feat))
+        # TODO: Pre-LN or Post-LN
+        # Post-LN
+        # query_feat = self.norm3(query_feat + self.ffn(query_feat))
+        # Pre-LN
+        # query_feat = self.ffn(self.norm3(query_feat)) + query_feat
 
         # 通过两层全连接网络，获得分类分数和回归目标
         cls_score = self.cls_branch(query_feat)  # [B, Q, num_classes]

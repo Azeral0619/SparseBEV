@@ -3,7 +3,6 @@ import importlib
 import logging
 import pickle
 import tkinter as tk
-import zlib
 from concurrent.futures import ThreadPoolExecutor
 from queue import Queue
 
@@ -52,13 +51,6 @@ queue = Queue()
 resp_queue = Queue()
 sio = socketio.Client(logger=True)
 client = httpx.Client()
-"""
-Sending:
-    {
-        imgs(List): List of images(base64)(num = 6)
-        img
-    }
-"""
 
 
 def update_image(image):
@@ -245,7 +237,7 @@ def main():
 
     if args.enable_ws == 1:
         url = args.url.replace("/detection", "")  # .replace("http", "ws")
-        sio.connect(url, transports=["websocket"])
+        sio.connect(url)
         # pool_request.submit(generate_data_ws)
     else:
         pool_request.submit(generate_stream_data)

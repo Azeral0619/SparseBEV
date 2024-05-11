@@ -25,7 +25,7 @@ box_type_3d = "LiDAR"
 # cloud range accordingly
 point_cloud_range = [-51.2, -51.2, -5.0, 51.2, 51.2, 3.0]
 voxel_size = [0.2, 0.2, 8]
-
+strides = [4, 8, 16, 32]
 # arch config
 embed_dims = 256
 num_layers = 6
@@ -34,6 +34,7 @@ num_frames = 8
 num_levels = 4
 num_points = 4
 num_views = 6
+num_depth_layers = 3
 
 img_backbone = dict(
     type="ResNet",
@@ -110,6 +111,12 @@ model = dict(
         loss_bbox=dict(type="L1Loss", loss_weight=0.25),
         loss_iou=dict(type="GIoULoss", loss_weight=0.0),
     ),
+    # depth_branch=dict(  # for auxiliary supervision only
+    #    type="DenseDepthNet",
+    #    embed_dims=embed_dims,
+    #    num_depth_layers=num_depth_layers,
+    #    loss_weight=0.2,
+    # ),
     train_cfg=dict(
         pts=dict(
             grid_size=[512, 512, 1],
@@ -144,6 +151,12 @@ train_pipeline = [
         num_views=num_views,
     ),
     dict(
+        type="LoadPointsFromFile",
+        coord_type="LIDAR",
+        load_dim=5,
+        use_dim=5,
+    ),
+    dict(
         type="LoadAnnotations3D",
         with_bbox_3d=True,
         with_label_3d=True,
@@ -162,10 +175,21 @@ train_pipeline = [
         rot_range=[-0.3925, 0.3925],
         scale_ratio_range=[0.95, 1.05],
     ),
+    dict(
+        type="MultiScaleDepthMapGenerator",
+        downsample=strides[:num_depth_layers],
+    ),
     dict(type="DefaultFormatBundle3D", class_names=class_names),
+    dict(type="NuScenesAdaptor"),
     dict(
         type="Collect3D",
-        keys=["gt_bboxes_3d", "gt_labels_3d", "img"],
+        keys=[
+            "gt_bboxes_3d",
+            "gt_labels_3d",
+            "img",
+            "gt_depth",
+            "focal",
+        ],
         meta_keys=(
             "filename",
             "ori_shape",
