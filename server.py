@@ -170,7 +170,7 @@ def main():
     core = model(args=args)
     pre_process = PreProcess(args=args)
     if ENABLE_SOCKETIO:
-        socketio.run(app, host="0.0.0.0", port=args.port, threaded=True)
+        socketio.run(app, host="0.0.0.0", port=args.port)
     else:
         eventlet.wsgi.server(
             eventlet.listen(("0.0.0.0", args.port)), app
