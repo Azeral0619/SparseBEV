@@ -81,7 +81,7 @@ class SparseBEV(MVXTwoStageDetector):
 
         return img_feats
 
-    def extract_feat(self, img, img_metas, return_depth=False, data=None):
+    def extract_feat(self, img, img_metas):
         if isinstance(img, list):
             img = torch.stack(img, dim=0)
 
@@ -161,13 +161,6 @@ class SparseBEV(MVXTwoStageDetector):
         for img_feat in img_feats:
             BN, C, H, W = img_feat.size()
             img_feats_reshaped.append(img_feat.view(B, int(BN / B), C, H, W))
-        if return_depth and self.depth_branch is not None:
-            curr_feats = [feat[:, :6, :, :, :] for feat in img_feats_reshaped]
-            depths = self.depth_branch(curr_feats, data.get("focal"))
-        else:
-            depths = None
-        if return_depth:
-            return img_feats_reshaped, depths
         return img_feats_reshaped
 
     def forward_pts_train(
@@ -255,7 +248,7 @@ class SparseBEV(MVXTwoStageDetector):
         Returns:
             dict: Losses of different branches.
         """
-        img_feats, depths = self.extract_feat(img, img_metas, data, True)
+        img_feats = self.extract_feat(img, img_metas)
 
         for i in range(len(img_metas)):
             img_metas[i]["gt_bboxes_3d"] = gt_bboxes_3d[i]
@@ -270,12 +263,14 @@ class SparseBEV(MVXTwoStageDetector):
             img_metas,
             data,
             gt_bboxes_ignore,
-            feature_maps=curr_feats,
+            # feature_maps=curr_feats,
         )
 
-        if depths is not None and "gt_depth" in img_metas:
-            losses["loss_dense_depth"] = self.depth_branch.loss(
-                depths, img_metas["gt_depth"]
+        if "gt_depth" in data:
+            losses["loss_dense_depth"] = self.depth_branch(
+                curr_feats,
+                data.get("focal"),
+                data["gt_depth"],
             )
 
         return losses
