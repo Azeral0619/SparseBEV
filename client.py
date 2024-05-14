@@ -10,6 +10,7 @@ import cv2
 import httpx
 import numpy as np
 import socketio
+import websocket
 from mmcv import Config
 from mmdet.apis import set_random_seed
 from mmdet3d.datasets import build_dataset
@@ -116,14 +117,19 @@ def viz_bbox_cv(nusc, bboxes, data_info):
     update_image(canvas)
 
 
-def handle_request(url, index, data):
+def handle_request(url, index, data, end=False):
     global client
-    logging.info(f"Sending {index}th data")
+    if end:
+        logging.info("All data are sent!")
+    else:
+        logging.info(f"Sending {index}th data")
     response = client.post(
         url,
         content=data,
         headers={"Content-Type": "application/octet-stream"},
     )
+    if end:
+        return
     result = pickle.loads(response.content)
     queue.put(index)
     render_response(result)
@@ -141,11 +147,7 @@ def generate_stream_data():
         pool_render.submit(handle_request, args.url, i, data)
     index += 1
     data = pickle.dumps((index, None))
-    _ = client.post(
-        args.url,
-        content=data,
-        headers={"Content-Type": "application/octet-stream"},
-    )
+    pool_render.submit(handle_request, args.url, i, data, True)
 
 
 def render_response(result):

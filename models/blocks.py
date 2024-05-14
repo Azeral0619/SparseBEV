@@ -97,7 +97,9 @@ class DenseDepthNet(BaseModule):
         depths = []
         for i, feat in enumerate(feature_maps[: self.num_depth_layers]):
             depth = self.depth_layers[i](feat.flatten(end_dim=1).float()).exp()
-            depth = (depth.T * focal / self.equal_focal).T
+            depth = (depth.permute(3, 2, 1, 0) * focal / self.equal_focal).permute(
+                3, 2, 1, 0
+            )
             depths.append(depth)
         if gt_depths is not None and self.training:
             loss = self.loss(depths, gt_depths)

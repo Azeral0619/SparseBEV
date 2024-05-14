@@ -45,7 +45,8 @@ class SparseBEVHead(DETRHead):
         self.test_cfg = test_cfg
         self.fp16_enabled = False
         self.embed_dims = in_channels
-        self.dense_depth_module = build(dense_depth_module, PLUGIN_LAYERS)
+        self.dense_depth_module = None
+        # self.dense_depth_module = build(dense_depth_module, PLUGIN_LAYERS)
 
         super(SparseBEVHead, self).__init__(
             num_classes, in_channels, train_cfg=train_cfg, test_cfg=test_cfg, **kwargs

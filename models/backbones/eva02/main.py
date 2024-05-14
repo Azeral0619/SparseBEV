@@ -7,7 +7,7 @@ from .vit import ViT, SimpleFeaturePyramid, partial
 from .fpn import LastLevelMaxPool
 
 
-@BACKBONES.register_module()
+# @BACKBONES.register_module()
 class EVA02(nn.Module):
     def __init__(
         self,

@@ -1,14 +1,1091 @@
-[2024-05-08 22:07:16,162][INFO] - Using GPU: NVIDIA GeForce RTX 3050 Laptop GPU
-[2024-05-08 22:07:16,167][INFO] - Setting random seed: 0
-[2024-05-08 22:07:16,167][INFO] - Creating model: SparseBEV
-[2024-05-08 22:07:16,697][INFO] - Loading checkpoint from checkpoints/r50_nuimg_704x256_400q_36ep.pth
+[2024-05-12 01:43:55,535][INFO] - Using GPU: NVIDIA GeForce RTX 3050 Laptop GPU
+[2024-05-12 01:43:55,542][INFO] - Setting random seed: 0
+[2024-05-12 01:43:55,543][INFO] - Creating model: SparseBEV
+[2024-05-12 01:43:56,148][INFO] - Loading checkpoint from checkpoints/r50_nuimg_704x256_400q_36ep.pth
+[2024-05-12 01:44:33,838][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
 Traceback (most recent call last):
-  File "server.py", line 181, in <module>
-    main()
-  File "server.py", line 173, in main
-    socketio.run(app, host="0.0.0.0", port=args.port, threaded=True)
-  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask_socketio/__init__.py", line 683, in run
-    run_server()
-  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask_socketio/__init__.py", line 677, in run_server
-    eventlet.wsgi.server(eventlet_socket, app,
-TypeError: server() got an unexpected keyword argument 'threaded'
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 9.5367431640625e-07 seconds
+[2024-05-12 01:44:33,858][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.1920928955078125e-06 seconds
+[2024-05-12 01:44:33,873][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.1920928955078125e-06 seconds
+[2024-05-12 01:44:33,884][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.1920928955078125e-06 seconds
+[2024-05-12 01:44:33,904][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 4.5299530029296875e-06 seconds
+[2024-05-12 01:44:33,916][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 7.152557373046875e-06 seconds
+[2024-05-12 01:44:33,927][INFO] - [POST] - /detection from 127.0.0.1
+/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/traceback.py:359: RuntimeWarning: coroutine 'detection' was never awaited
+  result.append(FrameSummary(
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.430511474609375e-06 seconds
+[2024-05-12 01:44:33,946][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.1920928955078125e-06 seconds
+[2024-05-12 01:44:33,958][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.430511474609375e-06 seconds
+[2024-05-12 01:44:33,966][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 7.152557373046875e-07 seconds
+[2024-05-12 01:44:33,977][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 9.298324584960938e-06 seconds
+[2024-05-12 01:44:33,987][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.1920928955078125e-06 seconds
+[2024-05-12 01:44:33,996][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.1920928955078125e-06 seconds
+[2024-05-12 01:44:34,013][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.1920928955078125e-06 seconds
+[2024-05-12 01:44:34,030][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.430511474609375e-06 seconds
+[2024-05-12 01:44:34,044][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.1920928955078125e-06 seconds
+[2024-05-12 01:44:34,065][INFO] - [POST] - /detection from 127.0.0.1
+/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/email/feedparser.py:221: RuntimeWarning: coroutine 'detection' was never awaited
+  headers = []
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.430511474609375e-06 seconds
+[2024-05-12 01:44:34,074][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.1920928955078125e-06 seconds
+[2024-05-12 01:44:34,084][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 2.384185791015625e-06 seconds
+[2024-05-12 01:44:34,102][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 9.5367431640625e-07 seconds
+[2024-05-12 01:44:34,117][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 9.5367431640625e-07 seconds
+[2024-05-12 01:44:34,132][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 9.5367431640625e-07 seconds
+[2024-05-12 01:44:34,145][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.1920928955078125e-06 seconds
+[2024-05-12 01:44:34,159][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 9.5367431640625e-07 seconds
+[2024-05-12 01:44:34,177][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 9.5367431640625e-07 seconds
+[2024-05-12 01:44:34,196][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 7.152557373046875e-07 seconds
+[2024-05-12 01:44:34,210][INFO] - [POST] - /detection from 127.0.0.1
+/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/email/feedparser.py:110: RuntimeWarning: coroutine 'detection' was never awaited
+  parts = self._partial.readlines()
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 7.152557373046875e-07 seconds
+[2024-05-12 01:44:34,219][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.1920928955078125e-06 seconds
+[2024-05-12 01:44:34,231][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.1920928955078125e-06 seconds
+[2024-05-12 01:44:34,241][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.1920928955078125e-06 seconds
+[2024-05-12 01:44:34,254][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.1920928955078125e-06 seconds
+[2024-05-12 01:44:34,268][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.1920928955078125e-06 seconds
+[2024-05-12 01:44:34,281][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 9.5367431640625e-07 seconds
+[2024-05-12 01:44:34,298][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.1920928955078125e-06 seconds
+[2024-05-12 01:44:34,320][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.9073486328125e-06 seconds
+[2024-05-12 01:44:34,335][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.430511474609375e-06 seconds
+[2024-05-12 01:44:34,351][INFO] - [POST] - /detection from 127.0.0.1
+/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/encodings/idna.py:161: RuntimeWarning: coroutine 'detection' was never awaited
+  for label in labels[:-1]:
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.6689300537109375e-06 seconds
+[2024-05-12 01:44:34,363][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 2.384185791015625e-06 seconds
+[2024-05-12 01:44:34,380][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.9073486328125e-06 seconds
+[2024-05-12 01:44:34,396][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 9.5367431640625e-07 seconds
+[2024-05-12 01:44:34,412][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 9.5367431640625e-07 seconds
+[2024-05-12 01:44:34,420][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.1920928955078125e-06 seconds
+[2024-05-12 01:44:34,429][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.430511474609375e-06 seconds
+[2024-05-12 01:44:34,439][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 7.152557373046875e-07 seconds
+[2024-05-12 01:44:34,451][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 9.5367431640625e-07 seconds
+[2024-05-12 01:44:34,465][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.9073486328125e-06 seconds
+[2024-05-12 01:44:34,480][INFO] - [POST] - /detection from 127.0.0.1
+/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/werkzeug/routing/matcher.py:90: RuntimeWarning: coroutine 'detection' was never awaited
+  if parts == []:
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.1920928955078125e-06 seconds
+[2024-05-12 01:44:34,498][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.1920928955078125e-06 seconds
+[2024-05-12 01:44:34,511][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 9.5367431640625e-07 seconds
+[2024-05-12 01:44:34,530][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.1920928955078125e-06 seconds
+[2024-05-12 01:44:34,541][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.1920928955078125e-06 seconds
+[2024-05-12 01:44:34,557][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 9.5367431640625e-07 seconds
+[2024-05-12 01:44:34,569][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.430511474609375e-06 seconds
+[2024-05-12 01:44:34,583][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 4.76837158203125e-07 seconds
+[2024-05-12 01:44:34,599][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.6689300537109375e-06 seconds
+[2024-05-12 01:44:34,613][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 7.152557373046875e-07 seconds
+[2024-05-12 01:44:34,631][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.1920928955078125e-06 seconds
+[2024-05-12 01:44:34,648][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 7.152557373046875e-07 seconds
+[2024-05-12 01:44:34,661][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 9.5367431640625e-07 seconds
+[2024-05-12 01:44:34,674][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 7.152557373046875e-07 seconds
+[2024-05-12 01:44:34,689][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 4.291534423828125e-06 seconds
+[2024-05-12 01:44:34,701][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 9.5367431640625e-07 seconds
+[2024-05-12 01:44:34,715][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 2.6226043701171875e-06 seconds
+[2024-05-12 01:44:34,731][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.9073486328125e-06 seconds
+[2024-05-12 01:44:34,747][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 7.152557373046875e-07 seconds
+[2024-05-12 01:44:34,765][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 7.152557373046875e-07 seconds
+[2024-05-12 01:44:34,781][INFO] - [POST] - /detection from 127.0.0.1
+/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/textwrap.py:480: RuntimeWarning: coroutine 'detection' was never awaited
+  return ''.join(prefixed_lines())
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 9.5367431640625e-07 seconds
+[2024-05-12 01:44:34,791][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 2.1457672119140625e-06 seconds
+[2024-05-12 01:44:34,801][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 9.5367431640625e-07 seconds
+[2024-05-12 01:44:34,811][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.9073486328125e-06 seconds
+[2024-05-12 01:44:34,824][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 7.152557373046875e-07 seconds
+[2024-05-12 01:44:34,835][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 2.384185791015625e-06 seconds
+[2024-05-12 01:44:34,847][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.9073486328125e-06 seconds
+[2024-05-12 01:44:34,858][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.6689300537109375e-06 seconds
+[2024-05-12 01:44:34,869][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 9.5367431640625e-07 seconds
+[2024-05-12 01:44:34,879][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 7.152557373046875e-07 seconds
+[2024-05-12 01:44:34,888][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 3.552436828613281e-05 seconds
+[2024-05-12 01:44:34,897][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 9.5367431640625e-07 seconds
+[2024-05-12 01:44:34,905][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 9.5367431640625e-07 seconds
+[2024-05-12 01:44:34,912][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 2.384185791015625e-06 seconds
+[2024-05-12 01:44:34,914][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 9.5367431640625e-07 seconds
+[2024-05-12 01:44:34,921][INFO] - [POST] - /detection from 127.0.0.1
+ERROR:server:Exception on /detection [POST]
+Traceback (most recent call last):
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1826, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 1845, in finalize_request
+    response = self.make_response(rv)
+  File "/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/flask/app.py", line 2174, in make_response
+    raise TypeError(
+TypeError: The view function did not return a valid response. The return type must be a string, dict, list, tuple with headers or status, Response instance, or WSGI callable, but it was a coroutine.
+Function detection run time: 1.1920928955078125e-06 seconds
+/home/azeral/miniconda3/envs/sparsebev/lib/python3.8/site-packages/matplotlib/_pylab_helpers.py:92: RuntimeWarning: coroutine 'detection' was never awaited
+  gc.collect(1)
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback

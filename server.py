@@ -1,49 +1,39 @@
 import threading
 
-import eventlet
-import eventlet.wsgi
+# import eventlet
+# import eventlet.wsgi
 
-eventlet.monkey_patch()
+# eventlet.monkey_patch()
 
-import argparse  # noqa: E402
+import asyncio  # noqa: E402
+import concurrent.futures  # noqa: E402
 import logging  # noqa: E402
 import pickle  # noqa: E402
 import time  # noqa: E402
-import utils  # noqa: E402
 
-import torch  # noqa: E402
-from flask import Flask, Response, request  # noqa: E402
-from flask_socketio import SocketIO, disconnect, emit  # noqa: E402
+from quart import Quart, websocket, request, Response  # noqa: E402
+from hypercorn.config import Config as hconfig  # noqa: E402
+from hypercorn.asyncio import serve  # noqa: E402
+from mmcv import Config  # noqa:E402
 
-from core import PreProcess, model  # noqa: E402
+# import utils  # noqa: E402
+from core import Pipeline, preprocess, Model  # noqa: E402
 
-ENABLE_SOCKETIO = True
-
-app = Flask(__name__)
-if ENABLE_SOCKETIO:
-    socketio = SocketIO(
-        logger=True,
-        ping_timeout=6000,
-        max_http_buffer_size=1024 * 1024 * 10,
-    )
-    socketio.init_app(app, cors_allowed_origins="*")
-core = None
-pre_process = None
+app = Quart(__name__)
+config = hconfig().from_toml("server.toml")
 memory = {}
 global_index = 0
 cond = threading.Condition()
-
-
-@app.before_request
-def log_each_request():
-    logging.info(
-        "[{}] - {} from {}".format(request.method, request.path, request.remote_addr)
-    )
+executor = concurrent.futures.ProcessPoolExecutor(8)
+logging.basicConfig(level=logging.INFO)
+model = Model(args=config)
+cfgs = Config.fromfile(config.config)
+pipeline = Pipeline(args=cfgs)
 
 
 @app.route("/detection", methods=["POST"])
-@utils.timer_decorator_func
-def detection():
+# @utils.timer_decorator_func
+async def detection():
     """Run the model on the input data and return the results.
 
     Inputs:
@@ -51,19 +41,22 @@ def detection():
     Outputs:
         results
     """
-    global global_index, pre_process, core, cond, memory
-    data = request.data
+    global global_index, pipeline, model, cond, memory, executor
+    data = await request.get_data()
     index, data = pickle.loads(data)
     # logging.info(f"Received {index}th data")
     if index == 0:
         memory["time"] = time.perf_counter()
         global_index = 0
-    data = pre_process(data)
+    data = await preprocess(pipeline, data)
+    # loop = asyncio.get_event_loop()
+    # data = await loop.run_in_executor(executor, preprocess, pipeline, data)
     with cond:
         while index != global_index:
+            print(index)
             cond.wait()
         if data is not None:
-            results = core(data)
+            results = model(data)
             global_index += 1
         cond.notify_all()
     if data is None:
@@ -95,86 +88,82 @@ def info():
     return "Real-time 3D object detection server"
 
 
-if ENABLE_SOCKETIO:
+@app.websocket("/detection-ws")
+async def detection_ws():
+    """Run the model on the input data and return the results.
 
-    @socketio.on("detection")
-    def detection_ws(data):
-        """Run the model on the input data and return the results.
+    Inputs:
+        data
+    Outputs:
+        results
+    """
+    res_queue = asyncio.Queue()
+    raw_data_queue = asyncio.Queue()
+    data_queue = asyncio.Queue()
 
-        Inputs:
-            data
-        Outputs:
-            results
-        """
-        global memory, pre_process, core
-        if len(data) == 0:
-            logging.info("All data are received")
-            disconnect()
-            return
-        data = pickle.loads(data)
-        data = pre_process(data)
-        memory[request.sid]["count"] += 1
-        with torch.no_grad():
-            torch.cuda.synchronize()
-            logging.info(f"Processing {memory[request.sid]['count']}th data")
-            results = core(data)
-            torch.cuda.synchronize()
-        if memory[request.sid]["count"] != 0 and memory[request.sid]["count"] % 20 == 0:
-            logging.info(
-                f"Done sample [{memory[request.sid]['count']} / ?], "
-                f"fps: {0 if memory[request.sid]['count'] == 0 else (time.perf_counter() - memory[request.sid]['time']) / memory[request.sid]['count']:.1f} sample / s"
-            )
-        data = pickle.dumps(results)
-        emit("result", data)
+    async def sending():
+        start = time.perf_counter()
+        index = 0
+        while True:
+            result = await res_queue.get()
+            if result is None:
+                logging.info(
+                    f"All sample Done [{index}] / ?], "
+                    f"fps: {0 if index == 0 else index / (time.perf_counter() - start):.1f} sample / s"
+                )
+                return
+            index, result = result
+            if index % 20 == 0:
+                logging.info(
+                    f"Done sample [{index}] / ?], "
+                    f"fps: {0 if index == 0 else index / (time.perf_counter() - start):.1f} sample / s"
+                )
+            await websocket.send(result)
 
-    @socketio.on("connect")
-    def handle_connect():
-        global memory
-        memory[request.sid] = {}
-        memory[request.sid]["time"] = time.perf_counter()
-        memory[request.sid]["count"] = 0
-        logging.info("Connected to client")
-        emit("data")
+    async def receiving():
+        while True:
+            data = await websocket.receive()
+            data = pickle.loads(data)
+            if len(data) == 0:
+                logging.info("All data are received")
+                await raw_data_queue.put(None)
+                return
+            await raw_data_queue.put(data)
 
-    @socketio.on("pong")
-    def pong():
-        emit("ping")
+    async def processing():
+        global pre_process, executor
+        while True:
+            data = await raw_data_queue.get()
+            if data is None:
+                await data_queue.put(None)
+                return
+            loop = asyncio.get_event_loop()
+            data = await loop.run_in_executor(executor, pre_process, data)
+            await data_queue.put(data)
 
-    @socketio.on("disconnect")
-    def handle_disconnect():
-        global memory
-        logging.info(
-            f"Done sample [{memory[request.sid]['count']} / {memory[request.sid]['count']}], "
-            f"fps: {0 if memory[request.sid]['count'] == 0 else (time.perf_counter() - memory[request.sid]['time']) / memory[request.sid]['count']:.1f} sample / s"
-        )
-        del memory[request.sid]
-        logging.info("Disconnected from client")
-        disconnect()
+    async def detecting():
+        global model
+        index = 0
+        while True:
+            data = await data_queue.get()
+            if data is None:
+                await res_queue.put(None)
+                return
+            index += 1
+            results = model(data)
+            data = pickle.dumps(results)
+            await res_queue.put((index, data))
 
-    @socketio.on("test")
-    def handle_test_ws(data):
-        emit("test", data)
+    producer = asyncio.create_task(receiving())
+    processers = [asyncio.create_task(processing()) for _ in range(4)]
+    consumer = asyncio.create_task(detecting())
+    sender = asyncio.create_task(sending())
+    await asyncio.gather(producer, *processers, consumer, sender)
+    websocket.close()
 
 
-def main():
-    global core, pre_process
-    logging.basicConfig(level=logging.INFO)
-    parser = argparse.ArgumentParser(description="Validate a detector")
-    parser.add_argument("--config", required=True)
-    parser.add_argument("--weights", required=True)
-    parser.add_argument("--local_rank", type=int, default=0)
-    parser.add_argument("--world_size", type=int, default=1)
-    parser.add_argument("--batch_size", type=int, default=1)
-    parser.add_argument("--port", type=int, default=8080)
-    args = parser.parse_args()
-    core = model(args=args)
-    pre_process = PreProcess(args=args)
-    if ENABLE_SOCKETIO:
-        socketio.run(app, host="0.0.0.0", port=args.port)
-    else:
-        eventlet.wsgi.server(
-            eventlet.listen(("0.0.0.0", args.port)), app
-        ).serve_forever()
+async def main():
+    asyncio.run(serve(app, config))
 
 
 if __name__ == "__main__":

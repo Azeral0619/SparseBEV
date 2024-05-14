@@ -96,7 +96,8 @@ class CustomLoadMultiViewImageFromFiles(object):
             img = results["img"]
             img = np.stack(
                 [
-                    np.array(Image.open(io.BytesIO(base64.b64decode(imgs))))
+                    np.array(Image.open(io.BytesIO(imgs)))
+                    # np.array(Image.open(io.BytesIO(base64.b64decode(imgs))))
                     for imgs in img
                 ],
                 axis=-1,
@@ -165,7 +166,8 @@ class LoadImageToBase64(object):
         def img_to_base64(img_path):
             with open(img_path, "rb") as f:
                 img = f.read()
-            return base64.b64encode(img).decode("utf-8")
+            return img
+            # base64.b64encode(img).decode("utf-8")
 
         filename = results["img_filename"][: self.num_views]
         # img is of shape (h, w, c, num_views)

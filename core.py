@@ -1,13 +1,14 @@
 import importlib
 import logging
 import os
+import time
 
 import torch
 import torch.backends.cudnn as cudnn
 import torch.distributed as dist
-from mmcv import Config
 from mmcv.parallel import MMDataParallel, MMDistributedDataParallel
 from mmcv.runner import load_checkpoint
+from mmcv import Config
 from mmdet.apis import set_random_seed
 from mmdet3d.models import build_model
 import threading
@@ -25,7 +26,7 @@ from mmdet3d.datasets.pipelines import (
 )
 
 
-class model(object):
+class Model(object):
     def __init__(self, args):
         self.mutex = threading.Lock()
         # parse configs
@@ -121,9 +122,9 @@ class model(object):
         return res
 
 
-class PreProcess(object):
+class Pipeline(object):
     def __init__(self, args):
-        self.cfgs = Config.fromfile(args.config)
+        self.cfgs = args
         num_frames = self.cfgs.num_frames
         num_views = self.cfgs.num_views
         ida_aug_conf = self.cfgs.ida_aug_conf
@@ -160,7 +161,6 @@ class PreProcess(object):
             ],
         )
 
-    @utils.timer_decorator
     def __call__(self, data):
         """Preprocess the input data.
 
@@ -186,3 +186,11 @@ class PreProcess(object):
         ]
         data["img_metas"][0]._data = [[data["img_metas"][0]._data]]
         return data
+
+
+async def preprocess(pipeline, data):
+    start_time = time.time()
+    result = pipeline(data)
+    end_time = time.time()
+    print(f"Function preprocess run time: {end_time - start_time} seconds")
+    return result
